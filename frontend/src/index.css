@@ -198,3 +198,18 @@
 .table-compact td {
   padding-inline: 0.625rem;
 }
+
+/* Printed invoices and contracts (pages/Print.tsx): plain white A4. */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body,
+  #root {
+    height: auto;
+    background: white !important;
+  }
+}

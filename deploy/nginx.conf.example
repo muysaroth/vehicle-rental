@@ -1,0 +1,55 @@
+# Nginx site for the Vehicle Rental MIS (Linux + PHP-FPM).
+# Copy to /etc/nginx/sites-available/rental, edit the three CHANGE ME lines,
+# link into sites-enabled, then: sudo nginx -t && sudo systemctl reload nginx
+# HTTPS certificate: sudo certbot --nginx -d rental.example.com
+
+server {
+    listen 80;
+    server_name rental.example.com;                       # CHANGE ME
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name rental.example.com;                       # CHANGE ME
+
+    # Filled in by certbot.
+    ssl_certificate     /etc/letsencrypt/live/rental.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/rental.example.com/privkey.pem;
+
+    # Only the public/ folder is served. Never point root at backend/.
+    root /var/www/vehicle-rental/backend/public;           # CHANGE ME
+    index index.php;
+
+    charset utf-8;
+    client_max_body_size 10m;
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+
+    # Built front-end files have hashed names: cache them for a long time.
+    location /build/assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;       # match your PHP version
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_hide_header X-Powered-By;
+    }
+
+    # Hidden files (.env, .git ...) are never served.
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}

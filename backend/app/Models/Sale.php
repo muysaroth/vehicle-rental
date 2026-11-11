@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sale extends Model
 {
+    use Auditable;
+
     public const METHODS = ['cash', 'bank', 'installment'];
 
     protected $fillable = [
@@ -63,5 +66,10 @@ class Sale extends Model
     public static function nextNumber(): string
     {
         return 'SL'.str_pad((string) ((int) static::max('id') + 1), 6, '0', STR_PAD_LEFT);
+    }
+
+    public function auditLabel(): string
+    {
+        return (string) $this->sale_no;
     }
 }

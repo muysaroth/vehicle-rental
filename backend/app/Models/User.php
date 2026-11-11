@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory;
+    use Auditable, HasApiTokens, HasFactory;
 
     public const ROLE_ADMIN = 'admin';
 
@@ -21,6 +22,9 @@ class User extends Authenticatable
     protected $fillable = ['name', 'email', 'password', 'role', 'is_active'];
 
     protected $hidden = ['password', 'remember_token'];
+
+    /** Matches the column default, so new instances are active before they are reloaded. */
+    protected $attributes = ['role' => self::ROLE_STAFF, 'is_active' => true];
 
     protected function casts(): array
     {
@@ -39,5 +43,10 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function auditLabel(): string
+    {
+        return trim("{$this->name} · {$this->email}");
     }
 }

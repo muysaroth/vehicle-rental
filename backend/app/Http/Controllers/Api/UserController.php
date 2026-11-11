@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
+use App\Models\Expense;
+use App\Models\Payment;
+use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +24,7 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'string', 'max:150', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6'],
+            'password' => ['required', 'string', 'min:8'],
             'role' => ['required', Rule::in(User::ROLES)],
             'is_active' => ['boolean'],
         ]);
@@ -33,7 +37,7 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:100'],
             'email' => ['sometimes', 'required', 'string', 'max:150', Rule::unique('users', 'email')->ignore($user->id)],
-            'password' => ['nullable', 'string', 'min:6'],
+            'password' => ['nullable', 'string', 'min:8'],
             'role' => ['sometimes', Rule::in(User::ROLES)],
             'is_active' => ['sometimes', 'boolean'],
         ]);
@@ -52,6 +56,11 @@ class UserController extends Controller
 
         $user->update($data);
 
+        // A disabled account, or one whose password an admin reset, must sign in again.
+        if (! $user->is_active || isset($data['password'])) {
+            $user->tokens()->when($request->user()->is($user), fn ($q) => $q->whereKeyNot($request->user()->currentAccessToken()?->getKey()))->delete();
+        }
+
         return response()->json($user);
     }
 
@@ -59,10 +68,10 @@ class UserController extends Controller
     {
         abort_if($request->user()->is($user), 422, 'You cannot delete your own account.');
 
-        $used = $user->hasMany(\App\Models\Booking::class)->exists()
-            || $user->hasMany(\App\Models\Sale::class)->exists()
-            || $user->hasMany(\App\Models\Payment::class)->exists()
-            || $user->hasMany(\App\Models\Expense::class)->exists();
+        $used = $user->hasMany(Booking::class)->exists()
+            || $user->hasMany(Sale::class)->exists()
+            || $user->hasMany(Payment::class)->exists()
+            || $user->hasMany(Expense::class)->exists();
 
         abort_if($used, 422, 'This account has records. Disable it instead of deleting.');
 

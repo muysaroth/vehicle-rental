@@ -141,8 +141,8 @@ function UserForm({ user, onClose, onSaved }: { user: User | null; onClose: () =
         <Field label={t('email')}>
           <input value={email} onChange={(e) => setEmail(e.target.value)} />
         </Field>
-        <Field label={t('password')}>
-          <input type="password" value={password} placeholder={user ? t('passwordKeep') : ''} onChange={(e) => setPassword(e.target.value)} />
+        <Field label={`${t('password')} · ${t('passwordRule')}`}>
+          <input type="password" autoComplete="new-password" minLength={8} value={password} placeholder={user ? t('passwordKeep') : ''} onChange={(e) => setPassword(e.target.value)} />
         </Field>
         <Field label={t('role')}>
           <select value={role} onChange={(e) => setRole(e.target.value as Role)}>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CustomerController;
@@ -12,9 +13,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::put('/auth/password', [AuthController::class, 'password'])->middleware('throttle:6,1');
+    Route::get('/company', [AuthController::class, 'company']);
 
     // ---- Front desk (every staff member) ---------------------------------
     Route::get('/dashboard', [ReportController::class, 'dashboard']);
@@ -55,5 +58,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('admin')->group(function () {
         Route::apiResource('users', UserController::class)->except('show');
+        Route::get('/activity', [ActivityController::class, 'index']);
     });
 });

@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { HiOutlineArrowUturnLeft, HiOutlineBanknotes, HiOutlineClock, HiOutlineCreditCard, HiOutlineArrowTrendingUp, HiOutlinePlus } from 'react-icons/hi2'
-import { Badge, Button, DetailList, Empty, ErrorNote, Field, Loading, Modal, PageHeader, SearchInput, Stat, Toolbar, cx, useLoad } from '@/components/ui'
+import { Link } from 'react-router-dom'
+import { HiOutlineArrowUturnLeft, HiOutlineBanknotes, HiOutlineClock, HiOutlineCreditCard, HiOutlineArrowTrendingUp, HiOutlinePlus, HiOutlinePrinter } from 'react-icons/hi2'
+import { Badge, Button, DetailList, Empty, ErrorNote, Field, Loading, Modal, PageHeader, SearchInput, Stat, Toolbar, buttonClass, cx, useLoad } from '@/components/ui'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { date, dateTime, isoDate, money, vehicleName } from '@/lib/format'
@@ -332,14 +333,18 @@ function SaleDetail({ id, onClose, onChanged, onDeleted }: { id: number; onClose
         <ErrorNote error={error} />
       </div>
 
-      {canManage && (
-        <div className="mt-5 flex justify-end border-t border-line pt-4">
+      <div className="mt-5 flex flex-wrap justify-between gap-2 border-t border-line pt-4">
+        <Link to={`/print/sale/${s.id}`} target="_blank" className={buttonClass('secondary', 'sm')}>
+          <HiOutlinePrinter />
+          {t('printInvoice')}
+        </Link>
+        {canManage && (
           <Button variant="danger" size="sm" onClick={() => void undo()}>
             <HiOutlineArrowUturnLeft />
             {t('undoSale')}
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </Modal>
   )
 }

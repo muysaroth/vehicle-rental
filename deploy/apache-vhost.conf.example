@@ -1,0 +1,27 @@
+# Apache virtual host (Linux, or XAMPP on Windows: C:\xampp\apache\conf\extra\httpd-vhosts.conf).
+# Needs mod_rewrite and mod_ssl. backend/public/.htaccess does the URL rewriting.
+
+<VirtualHost *:80>
+    ServerName rental.example.com
+    Redirect permanent / https://rental.example.com/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName rental.example.com
+
+    # Only the public/ folder. Never point DocumentRoot at backend/.
+    DocumentRoot "/var/www/vehicle-rental/backend/public"
+    # XAMPP example: DocumentRoot "C:/vehicle-rental/backend/public"
+
+    <Directory "/var/www/vehicle-rental/backend/public">
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    SSLEngine on
+    SSLCertificateFile    /etc/letsencrypt/live/rental.example.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/rental.example.com/privkey.pem
+
+    ErrorLog  ${APACHE_LOG_DIR}/rental-error.log
+    CustomLog ${APACHE_LOG_DIR}/rental-access.log combined
+</VirtualHost>

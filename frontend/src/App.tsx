@@ -4,11 +4,13 @@ import { Layout } from '@/components/Layout'
 import { AuthProvider, useAuth } from '@/lib/auth'
 import { I18nProvider } from '@/lib/i18n'
 import { ThemeProvider } from '@/lib/theme'
+import Activity from '@/pages/Activity'
 import Bookings from '@/pages/Bookings'
 import Customers from '@/pages/Customers'
 import Dashboard from '@/pages/Dashboard'
 import Expenses from '@/pages/Expenses'
 import Login from '@/pages/Login'
+import Print from '@/pages/Print'
 import Reports from '@/pages/Reports'
 import Sales from '@/pages/Sales'
 import Users from '@/pages/Users'
@@ -29,6 +31,7 @@ function Routed() {
 
   return (
     <Routes>
+      <Route path="print/:kind/:id" element={<Print />} />
       <Route element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="bookings" element={<Bookings />} />
@@ -38,6 +41,7 @@ function Routed() {
         <Route path="expenses" element={<Guard when={canManage}><Expenses /></Guard>} />
         <Route path="reports" element={<Guard when={canManage}><Reports /></Guard>} />
         <Route path="users" element={<Guard when={isAdmin}><Users /></Guard>} />
+        <Route path="activity" element={<Guard when={isAdmin}><Activity /></Guard>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
