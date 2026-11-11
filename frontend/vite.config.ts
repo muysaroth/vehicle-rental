@@ -5,9 +5,13 @@ import { defineConfig } from 'vite'
 
 const API = process.env.VITE_API_TARGET ?? 'http://127.0.0.1:8090'
 
+// Vercel sets VERCEL=1 during its builds. There the app is a standalone static
+// site in dist/ (vercel.json proxies /api to Laravel); everywhere else it is
+// built into Laravel's public/build and served under /app (routes/web.php).
+const onVercel = !!process.env.VERCEL
+
 export default defineConfig(({ command }) => ({
-  // Built into Laravel's public/build and served under /app (routes/web.php).
-  base: command === 'build' ? '/build/' : '/',
+  base: command === 'build' && !onVercel ? '/build/' : '/',
 
   plugins: [react(), tailwindcss()],
 
@@ -16,7 +20,7 @@ export default defineConfig(({ command }) => ({
   },
 
   build: {
-    outDir: fileURLToPath(new URL('../backend/public/build', import.meta.url)),
+    outDir: onVercel ? 'dist' : fileURLToPath(new URL('../backend/public/build', import.meta.url)),
     emptyOutDir: true,
   },
 
