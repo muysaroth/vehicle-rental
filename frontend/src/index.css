@@ -5,6 +5,9 @@
 @import '@fontsource/noto-sans-khmer/500.css';
 @import '@fontsource/noto-sans-khmer/700.css';
 
+/* Dark mode follows a `.dark` class on <html>, set by lib/theme.tsx (and early in index.html). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: 'Inter Variable', 'Noto Sans Khmer', ui-sans-serif, system-ui, sans-serif;
 
@@ -22,6 +25,44 @@
   --color-muted: #64748b;
   --color-line: #e2e8f0;
   --color-canvas: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #f8fafc;
+  --color-surface-3: #f1f5f9;
+}
+
+/*
+ * Dark theme: the semantic tokens above are redefined, so every component that uses
+ * bg-surface / text-ink / border-line etc. switches automatically. The status tints
+ * (badges, money colours, error notes) are remapped to readable dark equivalents.
+ */
+.dark {
+  color-scheme: dark;
+
+  --color-ink: #e2e8f0;
+  --color-muted: #94a3b8;
+  --color-line: #334155;
+  --color-canvas: #0b1120;
+  --color-surface: #131c2e;
+  --color-surface-2: #1a2438;
+  --color-surface-3: #243049;
+
+  --color-red-50: rgb(239 68 68 / 0.12);
+  --color-red-200: rgb(239 68 68 / 0.35);
+  --color-red-600: #f87171;
+  --color-red-700: #fca5a5;
+  --color-emerald-50: rgb(16 185 129 / 0.12);
+  --color-emerald-200: rgb(16 185 129 / 0.35);
+  --color-emerald-700: #34d399;
+  --color-sky-50: rgb(14 165 233 / 0.12);
+  --color-sky-200: rgb(14 165 233 / 0.35);
+  --color-sky-700: #7dd3fc;
+  --color-amber-50: rgb(245 158 11 / 0.12);
+  --color-amber-200: rgb(245 158 11 / 0.35);
+  --color-amber-700: #fbbf24;
+  --color-amber-800: #fcd34d;
+  --color-violet-50: rgb(139 92 246 / 0.14);
+  --color-violet-200: rgb(139 92 246 / 0.35);
+  --color-violet-700: #c4b5fd;
 }
 
 @layer base {
@@ -38,18 +79,18 @@
   input,
   select,
   textarea {
-    @apply rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+    @apply rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900;
   }
 
   input:disabled,
   select:disabled {
-    @apply bg-slate-50 text-muted;
+    @apply bg-surface-2 text-muted;
   }
 }
 
 @layer components {
   .card {
-    @apply rounded-xl border border-line bg-white shadow-sm;
+    @apply rounded-xl border border-line bg-surface shadow-sm;
   }
 
   .table {
@@ -57,7 +98,7 @@
   }
 
   .table th {
-    @apply border-b border-line bg-slate-50 px-3 py-2 text-xs font-semibold tracking-wide text-muted uppercase;
+    @apply border-b border-line bg-surface-2 px-3 py-2 text-xs font-semibold tracking-wide text-muted uppercase;
   }
 
   .table td {
@@ -65,7 +106,7 @@
   }
 
   .table tbody tr:hover {
-    @apply bg-slate-50;
+    @apply bg-surface-2;
   }
 
   .num {

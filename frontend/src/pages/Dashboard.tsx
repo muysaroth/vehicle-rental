@@ -85,7 +85,7 @@ export default function Dashboard() {
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="card p-4">
           <h3 className="mb-3 font-semibold">{t('fleetStatus')}</h3>
-          <div className="flex h-4 overflow-hidden rounded-full bg-slate-100">
+          <div className="flex h-4 overflow-hidden rounded-full bg-surface-3">
             {(Object.keys(STATUS_COLORS) as (keyof typeof STATUS_COLORS)[]).map((s) => (
               <div key={s} style={{ width: `${(fleet[s] / Math.max(1, fleet.total)) * 100}%`, background: STATUS_COLORS[s] }} />
             ))}

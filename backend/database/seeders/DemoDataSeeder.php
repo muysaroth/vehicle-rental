@@ -50,7 +50,9 @@ class DemoDataSeeder extends Seeder
         }
 
         $this->staff = User::pluck('id')->all();
-        $today = Carbon::today();
+        // DEMO_TODAY (YYYY-MM-DD) pins the 12-month window, so the figures in docs/03 can be
+        // reproduced exactly (they were taken with DEMO_TODAY=2026-11-10). Default: today.
+        $today = ($pinned = env('DEMO_TODAY')) ? Carbon::parse($pinned)->startOfDay() : Carbon::today();
         $start = $today->copy()->subMonthsNoOverflow(12)->startOfMonth();
 
         DB::transaction(function () use ($today, $start) {

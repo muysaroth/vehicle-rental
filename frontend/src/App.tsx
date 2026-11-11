@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { AuthProvider, useAuth } from '@/lib/auth'
 import { I18nProvider } from '@/lib/i18n'
+import { ThemeProvider } from '@/lib/theme'
 import Bookings from '@/pages/Bookings'
 import Customers from '@/pages/Customers'
 import Dashboard from '@/pages/Dashboard'
@@ -45,12 +46,14 @@ function Routed() {
 
 export default function App() {
   return (
-    <I18nProvider>
-      <AuthProvider>
-        <BrowserRouter basename={basename}>
-          <Routed />
-        </BrowserRouter>
-      </AuthProvider>
-    </I18nProvider>
+    <ThemeProvider>
+      <I18nProvider>
+        <AuthProvider>
+          <BrowserRouter basename={basename}>
+            <Routed />
+          </BrowserRouter>
+        </AuthProvider>
+      </I18nProvider>
+    </ThemeProvider>
   )
 }

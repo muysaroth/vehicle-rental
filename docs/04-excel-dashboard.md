@@ -30,7 +30,8 @@
 
 ```powershell
 cd vehicle-rental
-python tools/build_excel.py
+python tools/build_excel.py                                      # ១២ ខែចុងក្រោយ ដល់ថ្ងៃនេះ
+python tools/build_excel.py --from 2025-12-01 --to 2026-11-10    # រយៈពេលដូចឯកសារ ៣ (ឯកសារបច្ចុប្បន្ន)
 ```
 
 ក្រៅពីនេះ អ្នកគ្រប់គ្រងអាចចុច **នាំចេញ Excel** នៅលើអេក្រង់ **របាយការណ៍ & ការសម្រេចចិត្ត** ក្នុងប្រព័ន្ធ សម្រាប់រយៈពេលណាមួយ។
