@@ -1,5 +1,20 @@
 import { useState } from 'react'
-import { BookingStatusBadge, Button, Empty, ErrorNote, Field, Modal, PageHeader, useLoad } from '@/components/ui'
+import { HiOutlineClock, HiOutlinePencilSquare, HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi2'
+import {
+  BookingStatusBadge,
+  Button,
+  Empty,
+  ErrorNote,
+  Field,
+  IconButton,
+  Loading,
+  Modal,
+  PageHeader,
+  RowActions,
+  SearchInput,
+  Toolbar,
+  useLoad,
+} from '@/components/ui'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { date, money, vehicleName } from '@/lib/format'
@@ -17,7 +32,7 @@ export default function Customers() {
   const [editing, setEditing] = useState<Customer | 'new' | null>(null)
   const [viewing, setViewing] = useState<number | null>(null)
   const [error, setError] = useState<unknown>(null)
-  const { data, reload } = useLoad(() => api.get<Customer[]>('/customers', { search }), [search])
+  const { data, reload, error: loadError } = useLoad(() => api.get<Customer[]>('/customers', { search }), [search])
 
   const remove = async (c: Customer) => {
     if (!confirm(t('confirmDelete'))) return
@@ -33,16 +48,22 @@ export default function Customers() {
   return (
     <div>
       <PageHeader title={t('customers')}>
-        <input placeholder={t('search')} value={search} onChange={(e) => setSearch(e.target.value)} className="w-56" />
         <Button variant="primary" onClick={() => setEditing('new')}>
-          + {t('addCustomer')}
+          <HiOutlinePlus />
+          {t('addCustomer')}
         </Button>
       </PageHeader>
 
-      <ErrorNote error={error} />
+      <Toolbar>
+        <SearchInput value={search} onChange={setSearch} className="w-full sm:w-72" />
+      </Toolbar>
+
+      <ErrorNote error={error ?? loadError} />
 
       <div className="card overflow-x-auto">
-        {data && data.length === 0 ? (
+        {!data && !loadError ? (
+          <Loading />
+        ) : data && data.length === 0 ? (
           <Empty />
         ) : (
           <table className="table">
@@ -63,26 +84,28 @@ export default function Customers() {
               {data?.map((c) => (
                 <tr key={c.id}>
                   <td>
-                    <button type="button" className="font-medium text-brand-700 dark:text-brand-300 hover:underline" onClick={() => setViewing(c.id)}>
-                      {c.name}
+                    <button type="button" className="group flex items-center gap-3 text-left" onClick={() => setViewing(c.id)}>
+                      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700 dark:bg-brand-900/50 dark:text-brand-200">
+                        {c.name.trim().charAt(0).toUpperCase()}
+                      </span>
+                      <span className="font-medium text-ink group-hover:text-brand-700 group-hover:underline dark:group-hover:text-brand-300">{c.name}</span>
                     </button>
                   </td>
-                  <td>{c.phone}</td>
-                  <td>{c.id_card_no ?? '—'}</td>
-                  <td>{c.license_no ?? '—'}</td>
-                  <td>{c.address ?? '—'}</td>
+                  <td className="whitespace-nowrap">{c.phone}</td>
+                  <td className="text-muted">{c.id_card_no ?? '—'}</td>
+                  <td className="text-muted">{c.license_no ?? '—'}</td>
+                  <td className="max-w-56 truncate text-muted" title={c.address ?? undefined}>
+                    {c.address ?? '—'}
+                  </td>
                   <td className="num">{c.bookings_count}</td>
                   <td className="num">{c.sales_count}</td>
-                  <td className="num">{money(Number(c.rental_spend ?? 0) + Number(c.purchase_spend ?? 0))}</td>
-                  <td className="whitespace-nowrap text-right">
-                    <Button size="sm" variant="ghost" onClick={() => setEditing(c)}>
-                      {t('edit')}
-                    </Button>
-                    {canManage && !c.bookings_count && !c.sales_count && (
-                      <Button size="sm" variant="ghost" className="text-red-600" onClick={() => void remove(c)}>
-                        {t('delete')}
-                      </Button>
-                    )}
+                  <td className="num font-medium">{money(Number(c.rental_spend ?? 0) + Number(c.purchase_spend ?? 0))}</td>
+                  <td>
+                    <RowActions>
+                      <IconButton label={t('history')} icon={HiOutlineClock} onClick={() => setViewing(c.id)} />
+                      <IconButton label={t('edit')} icon={HiOutlinePencilSquare} onClick={() => setEditing(c)} />
+                      {canManage && !c.bookings_count && !c.sales_count && <IconButton tone="danger" label={t('delete')} icon={HiOutlineTrash} onClick={() => void remove(c)} />}
+                    </RowActions>
                   </td>
                 </tr>
               ))}
@@ -138,7 +161,7 @@ function CustomerForm({ customer, onClose, onSaved }: { customer: Customer | nul
         </>
       }
     >
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <Field label={t('name')} className="col-span-2">
           <input value={draft.name} onChange={(e) => set('name', e.target.value)} />
         </Field>
@@ -175,14 +198,15 @@ function CustomerHistory({ id, onClose }: { id: number; onClose: () => void }) {
   return (
     <Modal open wide onClose={onClose} title={c ? `${c.name} · ${c.phone}` : '…'}>
       {!c ? (
-        t('loading')
+        <Loading />
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-6">
           <div>
-            <h4 className="mb-2 text-sm font-semibold">
-              {t('bookings')} ({c.bookings?.length})
+            <h4 className="mb-2 text-xs font-semibold tracking-wide text-muted uppercase">
+              {t('bookings')} ({c.bookings?.length ?? 0})
             </h4>
-            <div className="max-h-72 overflow-y-auto rounded-lg border border-line">
+            <div className="max-h-72 overflow-y-auto rounded-xl border border-line">
+              {!c.bookings?.length && <Empty />}
               <table className="table">
                 <tbody>
                   {c.bookings?.map((b) => (
@@ -204,8 +228,11 @@ function CustomerHistory({ id, onClose }: { id: number; onClose: () => void }) {
           </div>
           {!!c.sales?.length && (
             <div>
-              <h4 className="mb-2 text-sm font-semibold">{t('sales')}</h4>
-              <table className="table rounded-lg border border-line">
+              <h4 className="mb-2 text-xs font-semibold tracking-wide text-muted uppercase">
+                {t('sales')} ({c.sales.length})
+              </h4>
+              <div className="overflow-x-auto rounded-xl border border-line">
+              <table className="table">
                 <tbody>
                   {c.sales.map((s) => (
                     <tr key={s.id}>
@@ -220,6 +247,7 @@ function CustomerHistory({ id, onClose }: { id: number; onClose: () => void }) {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
         </div>

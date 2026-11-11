@@ -1,6 +1,23 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Badge, BookingStatusBadge, Button, Empty, ErrorNote, Field, Modal, PageHeader, cx, useLoad } from '@/components/ui'
+import { HiOutlineArrowUturnLeft, HiOutlineCreditCard, HiOutlineKey, HiOutlinePlus, HiOutlineXCircle } from 'react-icons/hi2'
+import {
+  Badge,
+  BookingStatusBadge,
+  Button,
+  DetailList,
+  Empty,
+  ErrorNote,
+  Field,
+  Loading,
+  Modal,
+  PageHeader,
+  SearchInput,
+  Tabs,
+  Toolbar,
+  cx,
+  useLoad,
+} from '@/components/ui'
 import { api } from '@/lib/api'
 import { addDays, date, dateTime, daysBetween, isoDate, money, vehicleName } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
@@ -23,29 +40,23 @@ export default function Bookings() {
   return (
     <div>
       <PageHeader title={t('bookings')}>
-        <input placeholder={t('search')} value={search} onChange={(e) => setSearch(e.target.value)} className="w-56" />
         <Button variant="primary" onClick={() => setParams({ new: '1' })}>
-          + {t('newBooking')}
+          <HiOutlinePlus />
+          {t('newBooking')}
         </Button>
       </PageHeader>
 
-      <div className="mb-4 flex flex-wrap gap-1">
-        {TABS.map((s) => (
-          <button
-            key={s || 'all'}
-            type="button"
-            onClick={() => setStatus(s)}
-            className={cx('rounded-lg px-3 py-1.5 text-sm', status === s ? 'bg-brand-700 text-white' : 'bg-surface text-muted hover:bg-surface-3')}
-          >
-            {s ? t(`bstatus.${s}`) : t('all')}
-          </button>
-        ))}
-      </div>
+      <Toolbar className="justify-between">
+        <Tabs value={status} onChange={setStatus} options={TABS.map((s) => ({ value: s, label: s ? t(`bstatus.${s}`) : t('all') }))} />
+        <SearchInput value={search} onChange={setSearch} className="w-full sm:w-64" />
+      </Toolbar>
 
       <ErrorNote error={error} />
 
       <div className="card overflow-x-auto">
-        {data && data.length === 0 ? (
+        {!data && !error ? (
+          <Loading />
+        ) : data && data.length === 0 ? (
           <Empty />
         ) : (
           <table className="table">
@@ -65,20 +76,20 @@ export default function Bookings() {
             <tbody>
               {data?.map((b) => (
                 <tr key={b.id} className="cursor-pointer" onClick={() => setOpenId(b.id)}>
-                  <td className="font-mono text-xs">{b.booking_no}</td>
-                  <td>
+                  <td className="font-mono text-xs text-muted">{b.booking_no}</td>
+                  <td className="whitespace-nowrap">
                     <div className="font-medium">{b.customer?.name}</div>
                     <div className="text-xs text-muted">{b.customer?.phone}</div>
                   </td>
-                  <td>
+                  <td className="whitespace-nowrap">
                     <div>{vehicleName(b.vehicle)}</div>
                     <div className="text-xs text-muted">{b.vehicle?.plate_no}</div>
                   </td>
-                  <td>{date(b.start_date)}</td>
-                  <td>{date(b.end_date)}</td>
+                  <td className="whitespace-nowrap">{date(b.start_date)}</td>
+                  <td className="whitespace-nowrap">{date(b.end_date)}</td>
                   <td className="num">{b.days}</td>
-                  <td className="num">{money(b.total)}</td>
-                  <td className={cx('num', b.balance > 0 && 'font-medium text-amber-700')}>{money(b.balance)}</td>
+                  <td className="num font-medium">{money(b.total)}</td>
+                  <td className={cx('num', b.balance > 0 ? 'font-medium text-amber-700' : 'text-muted')}>{money(b.balance)}</td>
                   <td>
                     <BookingStatusBadge status={b.status} endDate={b.end_date} />
                   </td>
@@ -184,7 +195,7 @@ function NewBooking({ onClose, onCreated }: { onClose: () => void; onCreated: (b
         </>
       }
     >
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <Field label={t('startDate')}>
@@ -196,11 +207,11 @@ function NewBooking({ onClose, onCreated }: { onClose: () => void; onCreated: (b
           </div>
 
           <div>
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-muted">
                 {t('availableVehicles')} {available.data && `(${available.data.length})`}
               </span>
-              <select value={type} onChange={(e) => setType(e.target.value as VehicleType | '')} className="py-1 text-xs">
+              <select value={type} onChange={(e) => setType(e.target.value as VehicleType | '')} className="h-8 text-xs">
                 <option value="">{t('all')}</option>
                 {VEHICLE_TYPES.map((v) => (
                   <option key={v} value={v}>
@@ -209,9 +220,9 @@ function NewBooking({ onClose, onCreated }: { onClose: () => void; onCreated: (b
                 ))}
               </select>
             </div>
-            <div className="max-h-72 space-y-1 overflow-y-auto rounded-lg border border-line p-1">
-              {!validDates && <p className="p-3 text-sm text-muted">{t('checkAvailability')}</p>}
-              {validDates && available.data?.length === 0 && <p className="p-3 text-sm text-muted">{t('noAvailable')}</p>}
+            <div className="max-h-80 space-y-1 overflow-y-auto rounded-xl border border-line p-1.5">
+              {!validDates && <p className="p-4 text-center text-sm text-muted">{t('checkAvailability')}</p>}
+              {validDates && available.data?.length === 0 && <p className="p-4 text-center text-sm text-muted">{t('noAvailable')}</p>}
               {available.data?.map((v) => (
                 <button
                   key={v.id}
@@ -221,17 +232,17 @@ function NewBooking({ onClose, onCreated }: { onClose: () => void; onCreated: (b
                     setRate(String(v.daily_rate))
                   }}
                   className={cx(
-                    'flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm',
-                    v.id === vehicleId ? 'bg-brand-50 dark:bg-brand-900/40 ring-2 ring-brand-500' : 'hover:bg-surface-2',
+                    'flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors',
+                    v.id === vehicleId ? 'bg-brand-50 ring-2 ring-brand-500 ring-inset dark:bg-brand-900/40' : 'hover:bg-surface-2',
                   )}
                 >
-                  <span>
-                    <span className="font-medium">{vehicleName(v)}</span>{' '}
-                    <span className="text-xs text-muted">
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium">{vehicleName(v)}</span>
+                    <span className="block truncate text-xs text-muted">
                       {v.plate_no} · {t(`type.${v.type}`)} · {v.seats} {t('seats')}
                     </span>
                   </span>
-                  <span className="tabular-nums">{money(v.daily_rate)}</span>
+                  <span className="shrink-0 font-medium tabular-nums">{money(v.daily_rate)}</span>
                 </button>
               ))}
             </div>
@@ -252,8 +263,9 @@ function NewBooking({ onClose, onCreated }: { onClose: () => void; onCreated: (b
           <div className="flex gap-2">
             <input placeholder={t('name')} value={quick.name} onChange={(e) => setQuick({ ...quick, name: e.target.value })} className="min-w-0 flex-1" />
             <input placeholder={t('phone')} value={quick.phone} onChange={(e) => setQuick({ ...quick, phone: e.target.value })} className="w-32" />
-            <Button size="sm" className="h-auto" disabled={!quick.name || !quick.phone} onClick={() => void addCustomer()}>
-              + {t('add')}
+            <Button disabled={!quick.name || !quick.phone} onClick={() => void addCustomer()}>
+              <HiOutlinePlus />
+              {t('add')}
             </Button>
           </div>
 
@@ -281,18 +293,18 @@ function NewBooking({ onClose, onCreated }: { onClose: () => void; onCreated: (b
             <textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
           </Field>
 
-          <dl className="space-y-1 rounded-lg bg-surface-2 p-3 text-sm">
-            <div className="flex justify-between">
+          <dl className="space-y-1.5 rounded-xl border border-line bg-surface-2 p-4 text-sm">
+            <div className="flex justify-between gap-3">
               <dt>
                 {t('subtotal')} ({days} {t('days')} × {money(Number(rate || 0))})
               </dt>
               <dd className="tabular-nums">{money(gross)}</dd>
             </div>
-            <div className="flex justify-between text-muted">
+            <div className="flex justify-between gap-3 text-muted">
               <dt>{t('discount')}</dt>
               <dd className="tabular-nums">−{money(Number(discount || 0))}</dd>
             </div>
-            <div className="flex justify-between border-t border-line pt-1 text-base font-semibold">
+            <div className="flex justify-between gap-3 border-t border-line pt-2 text-base font-semibold">
               <dt>{t('total')}</dt>
               <dd className="tabular-nums">{money(total)}</dd>
             </div>
@@ -306,6 +318,8 @@ function NewBooking({ onClose, onCreated }: { onClose: () => void; onCreated: (b
 
 /* ------------------------------------------------------------- Booking detail */
 
+const panel = 'animate-fade-in space-y-3 rounded-xl border border-line bg-surface-2 p-4'
+
 function BookingDetail({ id, onClose, onChanged }: { id: number; onClose: () => void; onChanged: () => void }) {
   const { t } = useI18n()
   const { data: b, setData, error: loadError } = useLoad(() => api.get<Booking>(`/bookings/${id}`), [id])
@@ -317,7 +331,12 @@ function BookingDetail({ id, onClose, onChanged }: { id: number; onClose: () => 
   const [error, setError] = useState<unknown>(null)
   const [busy, setBusy] = useState(false)
 
-  if (!b) return <Modal open onClose={onClose} title="…">{loadError ? <ErrorNote error={loadError} /> : t('loading')}</Modal>
+  if (!b)
+    return (
+      <Modal open onClose={onClose} title="…">
+        {loadError ? <ErrorNote error={loadError} /> : <Loading />}
+      </Modal>
+    )
 
   const today = isoDate()
   const late = b.status === 'active' && b.end_date < today ? daysBetween(b.end_date, today) - 1 : 0
@@ -349,77 +368,71 @@ function BookingDetail({ id, onClose, onChanged }: { id: number; onClose: () => 
     setAmount(m === 'pay' ? String(b.balance) : '')
   }
 
+  const methodSelect = (
+    <Field label={t('method')}>
+      <select value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
+        {METHODS.map((m) => (
+          <option key={m} value={m}>
+            {t(`pay.${m}`)}
+          </option>
+        ))}
+      </select>
+    </Field>
+  )
+
   return (
     <Modal open wide onClose={onClose} title={`${b.booking_no} · ${b.customer?.name}`}>
-      <div className="grid gap-5 md:grid-cols-2">
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
-          <dt className="text-muted">{t('status')}</dt>
-          <dd>
-            <BookingStatusBadge status={b.status} endDate={b.end_date} /> {late > 0 && <Badge tone="red">{t('lateDays', { n: late })}</Badge>}
-          </dd>
-          <dt className="text-muted">{t('customer')}</dt>
-          <dd>
-            {b.customer?.name} · {b.customer?.phone}
-            {b.customer?.license_no && <div className="text-xs text-muted">{t('license')}: {b.customer.license_no}</div>}
-          </dd>
-          <dt className="text-muted">{t('vehicle')}</dt>
-          <dd>
-            {vehicleName(b.vehicle)} · {b.vehicle?.plate_no}
-          </dd>
-          <dt className="text-muted">{t('period')}</dt>
-          <dd>
-            {date(b.start_date)} → {date(b.end_date)} ({b.days} {t('days')})
-          </dd>
-          <dt className="text-muted">{t('dailyRate')}</dt>
-          <dd>{money(b.daily_rate)}</dd>
-          <dt className="text-muted">{t('discount')}</dt>
-          <dd>{money(b.discount)}</dd>
-          {b.late_fee > 0 && (
-            <>
-              <dt className="text-muted">{t('lateFee')}</dt>
-              <dd>{money(b.late_fee)}</dd>
-            </>
-          )}
-          <dt className="font-semibold">{t('total')}</dt>
-          <dd className="font-semibold">{money(b.total)}</dd>
-          <dt className="text-muted">{t('paid')}</dt>
-          <dd>{money(b.paid)}</dd>
-          <dt className="text-muted">{t('balance')}</dt>
-          <dd className={b.balance > 0 ? 'font-semibold text-amber-700' : ''}>{money(b.balance)}</dd>
-          <dt className="text-muted">{t('pickedUpAt')}</dt>
-          <dd>
-            {dateTime(b.picked_up_at)} {b.pickup_mileage != null && `· ${b.pickup_mileage} km`}
-          </dd>
-          <dt className="text-muted">{t('returnedAt')}</dt>
-          <dd>
-            {dateTime(b.returned_at)} {b.return_mileage != null && `· ${b.return_mileage} km`}
-          </dd>
-          <dt className="text-muted">{t('staff')}</dt>
-          <dd>{b.user?.name}</dd>
-          {b.notes && (
-            <>
-              <dt className="text-muted">{t('notes')}</dt>
-              <dd>{b.notes}</dd>
-            </>
-          )}
-        </dl>
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <BookingStatusBadge status={b.status} endDate={b.end_date} />
+            {late > 0 && <Badge tone="red">{t('lateDays', { n: late })}</Badge>}
+          </div>
+          <DetailList
+            rows={[
+              [
+                t('customer'),
+                <>
+                  {b.customer?.name} · {b.customer?.phone}
+                  {b.customer?.license_no && (
+                    <div className="text-xs text-muted">
+                      {t('license')}: {b.customer.license_no}
+                    </div>
+                  )}
+                </>,
+              ],
+              [t('vehicle'), `${vehicleName(b.vehicle)} · ${b.vehicle?.plate_no ?? ''}`],
+              [t('period'), `${date(b.start_date)} → ${date(b.end_date)} (${b.days} ${t('days')})`],
+              [t('dailyRate'), money(b.daily_rate)],
+              [t('discount'), money(b.discount)],
+              b.late_fee > 0 && [t('lateFee'), money(b.late_fee)],
+              [t('total'), money(b.total), 'strong'],
+              [t('paid'), money(b.paid)],
+              [t('balance'), money(b.balance), b.balance > 0 ? 'warn' : undefined],
+              [t('pickedUpAt'), `${dateTime(b.picked_up_at)}${b.pickup_mileage != null ? ` · ${b.pickup_mileage} km` : ''}`],
+              [t('returnedAt'), `${dateTime(b.returned_at)}${b.return_mileage != null ? ` · ${b.return_mileage} km` : ''}`],
+              [t('staff'), b.user?.name],
+              !!b.notes && [t('notes'), b.notes],
+            ]}
+          />
+        </div>
 
         <div className="space-y-4">
           <div>
-            <h4 className="mb-2 text-sm font-semibold">{t('payments')}</h4>
+            <h4 className="mb-2 text-xs font-semibold tracking-wide text-muted uppercase">{t('payments')}</h4>
             {b.payments?.length ? (
-              <ul className="divide-y divide-line rounded-lg border border-line text-sm">
+              <ul className="divide-y divide-line rounded-xl border border-line text-sm">
                 {b.payments.map((p) => (
-                  <li key={p.id} className="flex justify-between px-3 py-2">
+                  <li key={p.id} className="flex justify-between gap-3 px-4 py-2.5">
                     <span>
                       {dateTime(p.paid_at)} · {t(`pay.${p.method}`)} {p.reference && <span className="text-muted">· {p.reference}</span>}
                     </span>
-                    <span className="tabular-nums">{money(p.amount)}</span>
+                    <span className="font-medium tabular-nums">{money(p.amount)}</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted">{t('none')}</p>
+              <p className="rounded-xl border border-dashed border-line px-4 py-5 text-center text-sm text-muted">{t('none')}</p>
             )}
           </div>
 
@@ -427,17 +440,25 @@ function BookingDetail({ id, onClose, onChanged }: { id: number; onClose: () => 
             <div className="flex flex-wrap gap-2">
               {b.status === 'reserved' && (
                 <Button variant="primary" onClick={() => open('pickup')}>
+                  <HiOutlineKey />
                   {t('pickup')}
                 </Button>
               )}
               {b.status === 'active' && (
                 <Button variant="success" onClick={() => open('return')}>
+                  <HiOutlineArrowUturnLeft />
                   {t('return')}
                 </Button>
               )}
-              {b.status !== 'cancelled' && b.balance > 0 && <Button onClick={() => open('pay')}>{t('pay')}</Button>}
+              {b.status !== 'cancelled' && b.balance > 0 && (
+                <Button onClick={() => open('pay')}>
+                  <HiOutlineCreditCard />
+                  {t('pay')}
+                </Button>
+              )}
               {b.status === 'reserved' && (
                 <Button variant="danger" disabled={busy} onClick={() => confirm(t('cancelBooking') + '?') && void act('cancel')}>
+                  <HiOutlineXCircle />
                   {t('cancelBooking')}
                 </Button>
               )}
@@ -445,12 +466,13 @@ function BookingDetail({ id, onClose, onChanged }: { id: number; onClose: () => 
           )}
 
           {mode === 'pickup' && (
-            <div className="space-y-3 rounded-lg border border-line p-3">
+            <div className={panel}>
               <Field label={t('mileage')}>
                 <input type="number" value={mileage} onChange={(e) => setMileage(e.target.value)} />
               </Field>
               <div className="flex gap-2">
                 <Button variant="primary" disabled={busy} onClick={() => void act('pickup', { mileage: mileage ? Number(mileage) : null })}>
+                  <HiOutlineKey />
                   {t('pickup')}
                 </Button>
                 <Button onClick={() => setMode('view')}>{t('cancel')}</Button>
@@ -459,7 +481,7 @@ function BookingDetail({ id, onClose, onChanged }: { id: number; onClose: () => 
           )}
 
           {mode === 'return' && (
-            <div className="space-y-3 rounded-lg border border-line p-3">
+            <div className={panel}>
               <div className="grid grid-cols-2 gap-3">
                 <Field label={t('mileage')}>
                   <input type="number" value={mileage} onChange={(e) => setMileage(e.target.value)} />
@@ -470,15 +492,7 @@ function BookingDetail({ id, onClose, onChanged }: { id: number; onClose: () => 
                 <Field label={`${t('collectNow')} (${t('balance')} ${money(returnTotal - b.paid)})`}>
                   <input type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
                 </Field>
-                <Field label={t('method')}>
-                  <select value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-                    {METHODS.map((m) => (
-                      <option key={m} value={m}>
-                        {t(`pay.${m}`)}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
+                {methodSelect}
               </div>
               <div className="flex gap-2">
                 <Button
@@ -493,6 +507,7 @@ function BookingDetail({ id, onClose, onChanged }: { id: number; onClose: () => 
                     })
                   }
                 >
+                  <HiOutlineArrowUturnLeft />
                   {t('return')} · {money(returnTotal)}
                 </Button>
                 <Button onClick={() => setMode('view')}>{t('cancel')}</Button>
@@ -501,23 +516,16 @@ function BookingDetail({ id, onClose, onChanged }: { id: number; onClose: () => 
           )}
 
           {mode === 'pay' && (
-            <div className="space-y-3 rounded-lg border border-line p-3">
+            <div className={panel}>
               <div className="grid grid-cols-2 gap-3">
                 <Field label={t('amount')}>
                   <input type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
                 </Field>
-                <Field label={t('method')}>
-                  <select value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-                    {METHODS.map((m) => (
-                      <option key={m} value={m}>
-                        {t(`pay.${m}`)}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
+                {methodSelect}
               </div>
               <div className="flex gap-2">
                 <Button variant="primary" disabled={busy || !amount} onClick={() => void act('pay', { amount: Number(amount), method })}>
+                  <HiOutlineCreditCard />
                   {t('pay')}
                 </Button>
                 <Button onClick={() => setMode('view')}>{t('cancel')}</Button>
