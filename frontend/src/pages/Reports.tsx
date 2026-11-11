@@ -1,6 +1,16 @@
 import { useState } from 'react'
 import { Chart, Meter, TYPE_COLORS } from '@/components/charts'
-import { Button, ErrorNote, Field, PageHeader, Stat, useLoad } from '@/components/ui'
+import {
+  HiOutlineArrowDownTray,
+  HiOutlineArrowPath,
+  HiOutlineArrowTrendingUp,
+  HiOutlineBanknotes,
+  HiOutlineCalendarDays,
+  HiOutlineReceiptPercent,
+  HiOutlineSparkles,
+  HiOutlineTrophy,
+} from 'react-icons/hi2'
+import { Button, ErrorNote, Field, Loading, PageHeader, Section, Spinner, Stat, cx, useLoad } from '@/components/ui'
 import { api } from '@/lib/api'
 import { exportPerformance } from '@/lib/excel'
 import { isoDate, money, money0, pct } from '@/lib/format'
@@ -23,20 +33,27 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       <PageHeader title={t('reports')}>
-        <Field label={t('from')} className="flex-row items-center gap-2">
-          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-        </Field>
-        <Field label={t('to')} className="flex-row items-center gap-2">
-          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-        </Field>
-        <Button onClick={() => setRange({ from, to })}>{t('apply')}</Button>
         <Button variant="primary" disabled={!data} onClick={() => data && void exportPerformance(data, t)}>
+          <HiOutlineArrowDownTray />
           {t('exportExcel')}
         </Button>
       </PageHeader>
 
+      <div className="card flex flex-wrap items-end gap-3 p-4">
+        <Field label={t('from')}>
+          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+        </Field>
+        <Field label={t('to')}>
+          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        </Field>
+        <Button disabled={range.from === from && range.to === to} onClick={() => setRange({ from, to })}>
+          {loading && data ? <Spinner className="size-4" /> : <HiOutlineArrowPath />}
+          {t('apply')}
+        </Button>
+      </div>
+
       <ErrorNote error={error} />
-      {loading && !data && <p className="text-muted">{t('loading')}</p>}
+      {loading && !data && <Loading />}
       {data && <ReportBody data={data} />}
     </div>
   )
@@ -51,20 +68,24 @@ function ReportBody({ data }: { data: Performance }) {
   return (
     <>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        <Stat label={t('rentalRevenue')} value={money0(data.totals.rental_revenue)} hint={`${data.totals.bookings} ${t('bookingsCount')}`} />
-        <Stat label={t('salesRevenue')} value={money0(data.totals.sales_revenue)} hint={`${data.totals.units_sold} ${t('unitsSold')}`} />
-        <Stat label={t('salesProfit')} value={money0(data.totals.sales_profit)} />
-        <Stat label={t('expenses')} value={money0(data.totals.expenses)} />
-        <Stat label={t('netProfit')} value={money0(data.totals.net_profit)} tone="green" />
+        <Stat icon={HiOutlineCalendarDays} label={t('rentalRevenue')} value={money0(data.totals.rental_revenue)} hint={`${data.totals.bookings} ${t('bookingsCount')}`} />
+        <Stat icon={HiOutlineBanknotes} iconTone="blue" label={t('salesRevenue')} value={money0(data.totals.sales_revenue)} hint={`${data.totals.units_sold} ${t('unitsSold')}`} />
+        <Stat icon={HiOutlineArrowTrendingUp} iconTone="violet" label={t('salesProfit')} value={money0(data.totals.sales_profit)} />
+        <Stat icon={HiOutlineReceiptPercent} iconTone="amber" label={t('expenses')} value={money0(data.totals.expenses)} />
+        <Stat icon={HiOutlineSparkles} iconTone="green" label={t('netProfit')} value={money0(data.totals.net_profit)} tone="green" />
       </div>
 
       {/* ---- The decision ---- */}
       <section className="card overflow-hidden">
-        <div className="bg-brand-900 px-5 py-4 text-white">
-          <div className="text-xs tracking-wide text-brand-200 uppercase">{t('recommendation')}</div>
-          <h2 className="text-lg font-semibold">{t('decisionTitle')}</h2>
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand-800 to-brand-950 px-6 py-5 text-white">
+          <HiOutlineTrophy className="pointer-events-none absolute -top-4 -right-4 size-36 text-white/5" />
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-medium tracking-wide text-brand-100 uppercase">
+            <HiOutlineSparkles className="size-3.5" />
+            {t('recommendation')}
+          </div>
+          <h2 className="mt-2 text-lg font-semibold">{t('decisionTitle')}</h2>
           {best ? (
-            <p className="mt-2 text-brand-50">
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-brand-50/90">
               {t('recommendText', {
                 type: t(`type.${best.type}`),
                 score: best.score,
@@ -77,38 +98,46 @@ function ReportBody({ data }: { data: Performance }) {
             <p className="mt-2">{t('noData')}</p>
           )}
         </div>
-        <div className="grid gap-2 p-5 sm:grid-cols-5">
+        <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-5">
           {data.recommendation.ranking.map((r, i) => (
-            <div key={r.type} className={i === 0 ? 'rounded-lg bg-brand-50 dark:bg-brand-900/40 p-3 ring-2 ring-brand-500' : 'rounded-lg bg-surface-2 p-3'}>
-              <div className="flex items-baseline justify-between">
-                <span className="font-semibold">
-                  #{i + 1} {t(`type.${r.type}`)}
+            <div
+              key={r.type}
+              className={cx('rounded-xl border p-4', i === 0 ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500 dark:bg-brand-900/30' : 'border-line bg-surface-2')}
+            >
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="flex min-w-0 items-center gap-2 font-semibold">
+                  <span className={cx('grid size-6 shrink-0 place-items-center rounded-full text-xs', i === 0 ? 'bg-brand-600 text-white' : 'bg-surface-3 text-muted')}>{i + 1}</span>
+                  <span className="truncate">{t(`type.${r.type}`)}</span>
                 </span>
                 <span className="text-lg font-bold tabular-nums" style={{ color: TYPE_COLORS[r.type] }}>
                   {r.score}
                 </span>
               </div>
-              <div className="mt-2">
+              <div className="mt-3">
                 <Meter value={r.score / 100} color={TYPE_COLORS[r.type]} />
               </div>
-              <div className="mt-2 space-y-0.5 text-xs text-muted">
-                <div>ROI {pct(r.roi)}</div>
-                <div>
-                  {t('utilization')} {pct(r.utilization)}
-                </div>
-                <div>
-                  {t('profitPerVehicle')} {money0(r.profit_per_vehicle)}
-                </div>
-              </div>
+              <dl className="mt-3 space-y-1 text-xs">
+                {(
+                  [
+                    ['ROI', pct(r.roi)],
+                    [t('utilization'), pct(r.utilization)],
+                    [t('profitPerVehicle'), money0(r.profit_per_vehicle)],
+                  ] as const
+                ).map(([k, v]) => (
+                  <div key={k} className="flex justify-between gap-2">
+                    <dt className="text-muted">{k}</dt>
+                    <dd className="font-medium tabular-nums">{v}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           ))}
         </div>
-        <p className="px-5 pb-4 text-xs text-muted">{t('scoreHelp')}</p>
+        <p className="border-t border-line px-5 py-3 text-xs text-muted">{t('scoreHelp')}</p>
       </section>
 
       {/* ---- By type ---- */}
-      <section className="card overflow-x-auto">
-        <h3 className="border-b border-line px-4 py-3 font-semibold">{t('byType')}</h3>
+      <Section title={t('byType')} bodyClassName="overflow-x-auto">
         <table className="table">
           <thead>
             <tr>
@@ -155,11 +184,10 @@ function ReportBody({ data }: { data: Performance }) {
             ))}
           </tbody>
         </table>
-      </section>
+      </Section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="card p-4">
-          <h3 className="mb-3 font-semibold">{t('revenueByType')}</h3>
+        <Section title={t('revenueByType')} bodyClassName="p-5">
           <Chart
             labels={types.map((r) => t(`type.${r.type}`))}
             series={[
@@ -168,19 +196,17 @@ function ReportBody({ data }: { data: Performance }) {
             ]}
             format={money0}
           />
-        </section>
-        <section className="card p-4">
-          <h3 className="mb-3 font-semibold">{t('utilByType')}</h3>
+        </Section>
+        <Section title={t('utilByType')} bodyClassName="p-5">
           <Chart
             labels={types.map((r) => t(`type.${r.type}`))}
             series={[{ name: t('utilization'), color: '#2563eb', values: types.map((r) => r.utilization * 100) }]}
             format={(n) => `${Math.round(n)}%`}
           />
-        </section>
+        </Section>
       </div>
 
-      <section className="card p-4">
-        <h3 className="mb-3 font-semibold">{t('monthlyTrend')}</h3>
+      <Section title={t('monthlyTrend')} bodyClassName="p-5">
         <Chart
           kind="line"
           height={280}
@@ -192,11 +218,10 @@ function ReportBody({ data }: { data: Performance }) {
           ]}
           format={money0}
         />
-      </section>
+      </Section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="card overflow-x-auto">
-          <h3 className="border-b border-line px-4 py-3 font-semibold">{t('topCustomers')}</h3>
+        <Section title={t('topCustomers')} bodyClassName="overflow-x-auto">
           <table className="table">
             <thead>
               <tr>
@@ -220,9 +245,8 @@ function ReportBody({ data }: { data: Performance }) {
               ))}
             </tbody>
           </table>
-        </section>
-        <section className="card overflow-x-auto">
-          <h3 className="border-b border-line px-4 py-3 font-semibold">{t('topVehicles')}</h3>
+        </Section>
+        <Section title={t('topVehicles')} bodyClassName="overflow-x-auto">
           <table className="table">
             <thead>
               <tr>
@@ -248,11 +272,10 @@ function ReportBody({ data }: { data: Performance }) {
               ))}
             </tbody>
           </table>
-        </section>
+        </Section>
       </div>
 
-      <section className="card p-4">
-        <h3 className="mb-3 font-semibold">{t('expenseBreakdown')}</h3>
+      <Section title={t('expenseBreakdown')} bodyClassName="p-5">
         <div className="grid gap-3 sm:grid-cols-5">
           {Object.entries(data.expenses_by_category).map(([cat, amount]) => (
             <div key={cat} className="text-sm">
@@ -264,7 +287,7 @@ function ReportBody({ data }: { data: Performance }) {
             </div>
           ))}
         </div>
-      </section>
+      </Section>
     </>
   )
 }

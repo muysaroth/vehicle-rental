@@ -2,7 +2,9 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { LanguageSwitch } from '@/components/LanguageSwitch'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { Button, ErrorNote, Field } from '@/components/ui'
+import { HiOutlineKey } from 'react-icons/hi2'
+import { Logo } from '@/components/Logo'
+import { Button, ErrorNote, Field, Spinner, cx } from '@/components/ui'
 import { useAuth } from '@/lib/auth'
 import { useI18n } from '@/lib/i18n'
 
@@ -37,21 +39,27 @@ export default function Login() {
   }
 
   return (
-    <div className="grid min-h-full place-items-center bg-gradient-to-br from-brand-900 via-brand-800 to-slate-900 p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-6 text-center text-white">
-          <div className="text-4xl">🚗</div>
-          <h1 className="mt-2 text-2xl font-bold">{t('appName')}</h1>
-          <p className="text-sm text-brand-100">{t('appTagline')}</p>
+    <div className="relative grid min-h-full place-items-center overflow-hidden bg-brand-950 p-4 dark:bg-[#06141a]">
+      {/* Soft background glow */}
+      <div className="pointer-events-none absolute -top-40 -left-40 size-[520px] rounded-full bg-brand-500/25 blur-3xl" />
+      <div className="pointer-events-none absolute -right-40 -bottom-40 size-[520px] rounded-full bg-sky-500/15 blur-3xl" />
+
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <LanguageSwitch />
+        <ThemeToggle />
+      </div>
+
+      <div className="animate-pop-in relative w-full max-w-sm">
+        <div className="mb-8 flex flex-col items-center text-center text-white">
+          <Logo size="lg" />
+          <h1 className="mt-4 text-2xl font-bold tracking-tight">{t('appName')}</h1>
+          <p className="mt-1 text-sm text-brand-100/80">{t('appTagline')}</p>
         </div>
 
-        <form onSubmit={submit} className="card space-y-4 p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">{t('signIn')}</h2>
-            <div className="flex items-center gap-2">
-              <LanguageSwitch />
-              <ThemeToggle />
-            </div>
+        <form onSubmit={submit} className="space-y-4 rounded-2xl border border-line bg-surface p-6 shadow-2xl shadow-black/30 sm:p-7">
+          <div>
+            <h2 className="text-lg font-semibold">{t('welcomeBack')}</h2>
+            <p className="mt-0.5 text-sm text-muted">{t('signInHint')}</p>
           </div>
           <Field label={t('email')}>
             <input type="text" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
@@ -61,18 +69,25 @@ export default function Login() {
           </Field>
           <ErrorNote error={error} />
           <Button type="submit" variant="primary" className="w-full" disabled={busy}>
+            {busy && <Spinner className="size-4 border-white/40 border-t-white" />}
             {t('signIn')}
           </Button>
 
           {SHOW_DEMO && (
-            <div className="border-t border-line pt-3">
-              <div className="mb-2 text-xs font-medium text-muted">{t('demoAccounts')}</div>
+            <div className="border-t border-line pt-4">
+              <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted">
+                <HiOutlineKey className="size-3.5" />
+                {t('demoAccounts')}
+              </div>
               <div className="grid grid-cols-3 gap-2">
                 {DEMO.map(([e, p, role]) => (
                   <button
                     key={e}
                     type="button"
-                    className="rounded-lg border border-line px-2 py-1.5 text-xs hover:bg-surface-2"
+                    className={cx(
+                      'truncate rounded-lg border px-2 py-2 text-xs font-medium transition-colors',
+                      email === e ? 'border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200' : 'border-line text-muted hover:bg-surface-2 hover:text-ink',
+                    )}
                     onClick={() => {
                       setEmail(e)
                       setPassword(p)

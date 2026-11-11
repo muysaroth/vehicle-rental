@@ -20,6 +20,9 @@ const dict = {
   logout: ['ចាកចេញ', 'Sign out'],
   darkMode: ['របៀបងងឹត', 'Dark mode'],
   lightMode: ['របៀបភ្លឺ', 'Light mode'],
+  menu: ['ម៉ឺនុយ', 'Menu'],
+  welcomeBack: ['សូមស្វាគមន៍ការត្រឡប់មកវិញ', 'Welcome back'],
+  signInHint: ['សូមចូលគណនីរបស់អ្នក ដើម្បីបន្ត', 'Sign in to your account to continue'],
 
   // auth
   signIn: ['ចូលប្រព័ន្ធ', 'Sign in'],
@@ -78,6 +81,7 @@ const dict = {
   editVehicle: ['កែយានយន្ត', 'Edit vehicle'],
   setMaintenance: ['ដាក់ជួសជុល', 'Send to maintenance'],
   setAvailable: ['ត្រលប់មកប្រើវិញ', 'Back in service'],
+  vehicleSummary: ['{n} គ្រឿង', '{n} vehicles'],
 
   'type.car': ['ឡានតូច', 'Car'],
   'type.suv': ['ឡាន SUV', 'SUV'],
@@ -214,6 +218,7 @@ const dict = {
   // users
   role: ['តួនាទី', 'Role'],
   active: ['សកម្ម', 'Active'],
+  inactive: ['អសកម្ម', 'Inactive'],
   'role.admin': ['អ្នកគ្រប់គ្រងប្រព័ន្ធ', 'Administrator'],
   'role.manager': ['អ្នកគ្រប់គ្រង', 'Manager'],
   'role.staff': ['បុគ្គលិក', 'Staff'],

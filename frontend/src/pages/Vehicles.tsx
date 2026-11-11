@@ -1,5 +1,21 @@
 import { useState } from 'react'
-import { Button, Empty, ErrorNote, Field, Modal, PageHeader, VehicleStatusBadge, useLoad } from '@/components/ui'
+import { HiOutlineCheckCircle, HiOutlinePencilSquare, HiOutlinePlus, HiOutlineTrash, HiOutlineWrenchScrewdriver } from 'react-icons/hi2'
+import { TYPE_COLORS } from '@/components/charts'
+import {
+  Button,
+  Empty,
+  ErrorNote,
+  Field,
+  IconButton,
+  Loading,
+  Modal,
+  PageHeader,
+  RowActions,
+  SearchInput,
+  Toolbar,
+  VehicleStatusBadge,
+  useLoad,
+} from '@/components/ui'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { money, num } from '@/lib/format'
@@ -67,8 +83,17 @@ export default function Vehicles() {
 
   return (
     <div>
-      <PageHeader title={t('vehicles')}>
-        <input placeholder={t('search')} value={search} onChange={(e) => setSearch(e.target.value)} className="w-48" />
+      <PageHeader title={t('vehicles')} description={data ? t('vehicleSummary', { n: data.length }) : undefined}>
+        {canManage && (
+          <Button variant="primary" onClick={() => setEditing('new')}>
+            <HiOutlinePlus />
+            {t('addVehicle')}
+          </Button>
+        )}
+      </PageHeader>
+
+      <Toolbar>
+        <SearchInput value={search} onChange={setSearch} className="w-full sm:w-64" />
         <select value={type} onChange={(e) => setType(e.target.value)}>
           <option value="">{t('type')}: {t('all')}</option>
           {VEHICLE_TYPES.map((v) => (
@@ -90,30 +115,26 @@ export default function Vehicles() {
           <option value="rent">{t('purpose.rent')}</option>
           <option value="sale">{t('purpose.sale')}</option>
         </select>
-        {canManage && (
-          <Button variant="primary" onClick={() => setEditing('new')}>
-            + {t('addVehicle')}
-          </Button>
-        )}
-      </PageHeader>
+      </Toolbar>
 
       <ErrorNote error={error ?? loadError} />
 
       <div className="card overflow-x-auto">
-        {data && data.length === 0 ? (
+        {!data && !loadError ? (
+          <Loading />
+        ) : data && data.length === 0 ? (
           <Empty />
         ) : (
-          <table className="table">
+          <table className="table table-compact">
             <thead>
               <tr>
                 <th>{t('plateNo')}</th>
                 <th>{t('vehicle')}</th>
                 <th>{t('type')}</th>
-                <th>{t('purpose')}</th>
                 <th className="num">{t('dailyRate')}</th>
                 <th className="num">{t('salePrice')}</th>
                 {canManage && <th className="num">{t('purchaseCost')}</th>}
-                <th className="num">{t('mileage')}</th>
+                <th className="num hidden 2xl:table-cell">{t('mileage')}</th>
                 <th className="num">{t('rentals')}</th>
                 <th>{t('status')}</th>
                 {canManage && <th />}
@@ -122,8 +143,10 @@ export default function Vehicles() {
             <tbody>
               {data?.map((v) => (
                 <tr key={v.id}>
-                  <td className="font-mono text-xs">{v.plate_no}</td>
                   <td>
+                    <span className="rounded-md border border-line bg-surface-2 px-1.5 py-0.5 font-mono text-xs whitespace-nowrap">{v.plate_no}</span>
+                  </td>
+                  <td className="whitespace-nowrap">
                     <div className="font-medium">
                       {v.brand} {v.model}
                     </div>
@@ -131,41 +154,36 @@ export default function Vehicles() {
                       {v.year} · {v.color} · {v.seats} {t('seats')}
                     </div>
                   </td>
-                  <td>{t(`type.${v.type}`)}</td>
-                  <td>{t(`purpose.${v.purpose}`)}</td>
-                  <td className="num">{v.purpose === 'sale' ? '—' : money(v.daily_rate)}</td>
-                  <td className="num">{v.purpose === 'rent' ? '—' : money(v.sale_price)}</td>
-                  {canManage && <td className="num">{money(v.purchase_cost)}</td>}
-                  <td className="num">{num(v.mileage)}</td>
+                  <td className="whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <span className="size-2 rounded-full" style={{ background: TYPE_COLORS[v.type] }} />
+                      {t(`type.${v.type}`)}
+                    </div>
+                    <div className="pl-4 text-xs text-muted">{t(`purpose.${v.purpose}`)}</div>
+                  </td>
+                  <td className="num">{v.purpose === 'sale' ? <span className="text-muted">—</span> : money(v.daily_rate)}</td>
+                  <td className="num">{v.purpose === 'rent' ? <span className="text-muted">—</span> : money(v.sale_price)}</td>
+                  {canManage && <td className="num text-muted">{money(v.purchase_cost)}</td>}
+                  <td className="num hidden text-muted 2xl:table-cell">{num(v.mileage)}</td>
                   <td className="num">{v.rentals_count ?? 0}</td>
                   <td>
                     <VehicleStatusBadge status={v.status} />
                   </td>
                   {canManage && (
-                    <td className="whitespace-nowrap text-right">
-                      {v.status !== 'sold' && (
-                        <>
-                          {v.status === 'maintenance' ? (
-                            <Button size="sm" variant="ghost" onClick={() => void setService(v, 'available')}>
-                              {t('setAvailable')}
-                            </Button>
-                          ) : (
-                            v.status !== 'rented' && (
-                              <Button size="sm" variant="ghost" onClick={() => void setService(v, 'maintenance')}>
-                                {t('setMaintenance')}
-                              </Button>
-                            )
-                          )}
-                          <Button size="sm" variant="ghost" onClick={() => setEditing(v)}>
-                            {t('edit')}
-                          </Button>
-                        </>
-                      )}
-                      {!v.rentals_count && v.status !== 'sold' && (
-                        <Button size="sm" variant="ghost" className="text-red-600" onClick={() => void remove(v)}>
-                          {t('delete')}
-                        </Button>
-                      )}
+                    <td>
+                      <RowActions>
+                        {v.status !== 'sold' && (
+                          <>
+                            {v.status === 'maintenance' ? (
+                              <IconButton tone="success" label={t('setAvailable')} icon={HiOutlineCheckCircle} onClick={() => void setService(v, 'available')} />
+                            ) : (
+                              v.status !== 'rented' && <IconButton label={t('setMaintenance')} icon={HiOutlineWrenchScrewdriver} onClick={() => void setService(v, 'maintenance')} />
+                            )}
+                            <IconButton label={t('edit')} icon={HiOutlinePencilSquare} onClick={() => setEditing(v)} />
+                          </>
+                        )}
+                        {!v.rentals_count && v.status !== 'sold' && <IconButton tone="danger" label={t('delete')} icon={HiOutlineTrash} onClick={() => void remove(v)} />}
+                      </RowActions>
                     </td>
                   )}
                 </tr>
@@ -221,7 +239,7 @@ function VehicleForm({ vehicle, onClose, onSaved }: { vehicle: Vehicle | null; o
         </>
       }
     >
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Field label={t('plateNo')}>
           <input value={draft.plate_no} onChange={(e) => set('plate_no', e.target.value)} />
         </Field>

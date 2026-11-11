@@ -16,7 +16,7 @@ export function LanguageSwitch({ className }: { className?: string }) {
     <div
       role="group"
       aria-label="Language / ភាសា"
-      className={cx('inline-flex items-center gap-1 rounded-lg border border-line bg-surface p-0.5 text-xs shadow-sm', className)}
+      className={cx('inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-surface p-1 text-xs shadow-xs', className)}
     >
       <HiOutlineLanguage className="ml-1.5 size-4 text-muted" aria-hidden />
       {LANGS.map(({ code, label }) => (
@@ -27,8 +27,8 @@ export function LanguageSwitch({ className }: { className?: string }) {
           aria-pressed={lang === code}
           onClick={() => setLang(code)}
           className={cx(
-            'rounded-md px-2.5 py-1 font-medium transition-colors',
-            lang === code ? 'bg-brand-700 text-white' : 'text-muted hover:bg-surface-3',
+            'h-full rounded-md px-2.5 font-medium transition-colors',
+            lang === code ? 'bg-brand-700 text-white shadow-xs dark:bg-brand-600' : 'text-muted hover:bg-surface-3 hover:text-ink',
           )}
         >
           {label}

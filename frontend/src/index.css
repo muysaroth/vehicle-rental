@@ -15,11 +15,13 @@
   --color-brand-100: #ccfbf1;
   --color-brand-200: #99f6e4;
   --color-brand-300: #5eead4;
+  --color-brand-400: #2dd4bf;
   --color-brand-500: #14b8a6;
   --color-brand-600: #0d9488;
   --color-brand-700: #0f766e;
   --color-brand-800: #115e59;
   --color-brand-900: #134e4a;
+  --color-brand-950: #042f2e;
 
   --color-ink: #0f172a;
   --color-muted: #64748b;
@@ -76,21 +78,46 @@
     @apply bg-canvas text-ink antialiased;
   }
 
-  input,
+  /* Text-like controls only: checkboxes and radios keep their native shape. */
+  input:not([type='checkbox'], [type='radio']),
   select,
   textarea {
-    @apply rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900;
+    @apply rounded-lg border border-line bg-surface px-3 text-sm text-ink shadow-xs outline-none transition-colors placeholder:text-muted/70 focus:border-brand-500 focus:ring-3 focus:ring-brand-500/15;
+  }
+
+  input:not([type='checkbox'], [type='radio']),
+  select {
+    @apply h-10;
+  }
+
+  textarea {
+    @apply py-2;
+  }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    @apply size-4 accent-brand-600;
   }
 
   input:disabled,
   select:disabled {
     @apply bg-surface-2 text-muted;
   }
+
+  button:focus-visible,
+  a:focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line) transparent;
+  }
 }
 
 @layer components {
   .card {
-    @apply rounded-xl border border-line bg-surface shadow-sm;
+    @apply rounded-xl border border-line bg-surface shadow-xs;
   }
 
   .table {
@@ -98,18 +125,76 @@
   }
 
   .table th {
-    @apply border-b border-line bg-surface-2 px-3 py-2 text-xs font-semibold tracking-wide text-muted uppercase;
+    @apply border-b border-line bg-surface-2 px-4 py-2.5 text-xs font-semibold tracking-wide whitespace-nowrap text-muted uppercase;
   }
 
   .table td {
-    @apply border-b border-line px-3 py-2 align-middle;
+    @apply border-b border-line px-4 py-3 align-middle;
+  }
+
+  .table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .table tbody tr {
+    @apply transition-colors;
   }
 
   .table tbody tr:hover {
     @apply bg-surface-2;
   }
 
+  .table tfoot td {
+    @apply border-t border-line bg-surface-2 px-4 py-3;
+  }
+
   .num {
     @apply text-right tabular-nums;
   }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@utility animate-fade-in {
+  animation: fade-in 150ms ease-out;
+}
+
+@utility animate-pop-in {
+  animation: pop-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@utility animate-slide-in {
+  animation: slide-in 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* Denser table for wide data sets (Vehicles). */
+.table-compact th,
+.table-compact td {
+  padding-inline: 0.625rem;
 }

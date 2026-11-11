@@ -16,7 +16,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       onClick={toggle}
       title={label}
       aria-label={label}
-      className={cx('inline-grid size-8 place-items-center rounded-lg border border-line bg-surface text-muted shadow-sm transition-colors hover:bg-surface-3 hover:text-ink', className)}
+      className={cx('inline-grid size-9 shrink-0 place-items-center rounded-lg border border-line bg-surface text-muted shadow-xs transition-colors hover:bg-surface-3 hover:text-ink', className)}
     >
       <Icon className="size-4" />
     </button>

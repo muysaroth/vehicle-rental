@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Button, Empty, ErrorNote, Field, Modal, PageHeader, Stat, useLoad } from '@/components/ui'
+import { HiOutlinePencilSquare, HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi2'
+import { Meter } from '@/components/charts'
+import { Badge, Button, Empty, ErrorNote, Field, IconButton, Loading, Modal, PageHeader, RowActions, Stat, Toolbar, useLoad } from '@/components/ui'
 import { api } from '@/lib/api'
 import { addDays, date, isoDate, money, vehicleName } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
@@ -13,7 +15,7 @@ export default function Expenses() {
   const [category, setCategory] = useState('')
   const [editing, setEditing] = useState<Expense | 'new' | null>(null)
   const [error, setError] = useState<unknown>(null)
-  const { data, reload } = useLoad(() => api.get<Expense[]>('/expenses', { from, to, category }), [from, to, category])
+  const { data, reload, error: loadError } = useLoad(() => api.get<Expense[]>('/expenses', { from, to, category }), [from, to, category])
   const vehicles = useLoad(() => api.get<Vehicle[]>('/vehicles'), [])
 
   const total = (data ?? []).reduce((a, e) => a + e.amount, 0)
@@ -32,33 +34,49 @@ export default function Expenses() {
   return (
     <div>
       <PageHeader title={t('expenses')}>
-        <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-        <span className="text-muted">→</span>
-        <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        <Button variant="primary" onClick={() => setEditing('new')}>
+          <HiOutlinePlus />
+          {t('addExpense')}
+        </Button>
+      </PageHeader>
+
+      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
+        <Stat label={t('total')} value={money(total)} hint={data ? `${data.length} ${t('expenses')}` : undefined} />
+        {byCat.map(([c, v]) => (
+          <div key={c} className="card p-4">
+            <div className="truncate text-xs font-medium text-muted">{t(`cat.${c}`)}</div>
+            <div className="mt-1.5 truncate text-lg font-semibold tabular-nums">{money(v)}</div>
+            <div className="mt-2">
+              <Meter value={total ? v / total : 0} color="#f59e0b" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Toolbar>
+        <div className="flex items-center gap-2">
+          <input type="date" aria-label={t('from')} value={from} onChange={(e) => setFrom(e.target.value)} />
+          <span className="text-muted">→</span>
+          <input type="date" aria-label={t('to')} value={to} onChange={(e) => setTo(e.target.value)} />
+        </div>
         <select value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option value="">{t('category')}: {t('all')}</option>
+          <option value="">
+            {t('category')}: {t('all')}
+          </option>
           {EXPENSE_CATEGORIES.map((c) => (
             <option key={c} value={c}>
               {t(`cat.${c}`)}
             </option>
           ))}
         </select>
-        <Button variant="primary" onClick={() => setEditing('new')}>
-          + {t('addExpense')}
-        </Button>
-      </PageHeader>
+      </Toolbar>
 
-      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-6">
-        <Stat label={t('total')} value={money(total)} />
-        {byCat.map(([c, v]) => (
-          <Stat key={c} label={t(`cat.${c}`)} value={money(v)} />
-        ))}
-      </div>
-
-      <ErrorNote error={error} />
+      <ErrorNote error={error ?? loadError} />
 
       <div className="card overflow-x-auto">
-        {data && data.length === 0 ? (
+        {!data && !loadError ? (
+          <Loading />
+        ) : data && data.length === 0 ? (
           <Empty />
         ) : (
           <table className="table">
@@ -75,18 +93,27 @@ export default function Expenses() {
             <tbody>
               {data?.map((e) => (
                 <tr key={e.id}>
-                  <td>{date(e.spent_on)}</td>
-                  <td>{t(`cat.${e.category}`)}</td>
-                  <td>{e.vehicle ? `${vehicleName(e.vehicle)} · ${e.vehicle.plate_no}` : <span className="text-muted">{t('generalExpense')}</span>}</td>
-                  <td>{e.description}</td>
-                  <td className="num">{money(e.amount)}</td>
-                  <td className="whitespace-nowrap text-right">
-                    <Button size="sm" variant="ghost" onClick={() => setEditing(e)}>
-                      {t('edit')}
-                    </Button>
-                    <Button size="sm" variant="ghost" className="text-red-600" onClick={() => void remove(e)}>
-                      {t('delete')}
-                    </Button>
+                  <td className="whitespace-nowrap">{date(e.spent_on)}</td>
+                  <td>
+                    <Badge>{t(`cat.${e.category}`)}</Badge>
+                  </td>
+                  <td>
+                    {e.vehicle ? (
+                      <>
+                        <div>{vehicleName(e.vehicle)}</div>
+                        <div className="text-xs text-muted">{e.vehicle.plate_no}</div>
+                      </>
+                    ) : (
+                      <span className="text-muted">{t('generalExpense')}</span>
+                    )}
+                  </td>
+                  <td className="text-muted">{e.description}</td>
+                  <td className="num font-medium">{money(e.amount)}</td>
+                  <td>
+                    <RowActions>
+                      <IconButton label={t('edit')} icon={HiOutlinePencilSquare} onClick={() => setEditing(e)} />
+                      <IconButton tone="danger" label={t('delete')} icon={HiOutlineTrash} onClick={() => void remove(e)} />
+                    </RowActions>
                   </td>
                 </tr>
               ))}
@@ -145,7 +172,7 @@ function ExpenseForm({ expense, vehicles, onClose, onSaved }: { expense: Expense
         </>
       }
     >
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <Field label={t('date')}>
           <input type="date" value={spentOn} onChange={(e) => setSpentOn(e.target.value)} />
         </Field>
@@ -177,7 +204,7 @@ function ExpenseForm({ expense, vehicles, onClose, onSaved }: { expense: Expense
           <input value={description} onChange={(e) => setDescription(e.target.value)} />
         </Field>
       </div>
-      <div className="mt-3">
+      <div className="mt-4">
         <ErrorNote error={error} />
       </div>
     </Modal>

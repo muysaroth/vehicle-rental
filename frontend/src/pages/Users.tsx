@@ -1,16 +1,19 @@
 import { useState } from 'react'
-import { Badge, Button, ErrorNote, Field, Modal, PageHeader, useLoad } from '@/components/ui'
+import { HiOutlinePencilSquare, HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi2'
+import { Badge, Button, ErrorNote, Field, IconButton, Loading, Modal, PageHeader, RowActions, useLoad } from '@/components/ui'
 import { api } from '@/lib/api'
 import { useI18n } from '@/lib/i18n'
 import type { Role, User } from '@/lib/types'
 
 const ROLES: Role[] = ['admin', 'manager', 'staff']
 
+const roleTone = { admin: 'violet', manager: 'blue', staff: 'slate' } as const
+
 export default function Users() {
   const { t } = useI18n()
   const [editing, setEditing] = useState<User | 'new' | null>(null)
   const [error, setError] = useState<unknown>(null)
-  const { data, reload } = useLoad(() => api.get<User[]>('/users'), [])
+  const { data, reload, error: loadError } = useLoad(() => api.get<User[]>('/users'), [])
 
   const remove = async (u: User) => {
     if (!confirm(t('confirmDelete'))) return
@@ -27,40 +30,60 @@ export default function Users() {
     <div>
       <PageHeader title={t('users')}>
         <Button variant="primary" onClick={() => setEditing('new')}>
-          + {t('addUser')}
+          <HiOutlinePlus />
+          {t('addUser')}
         </Button>
       </PageHeader>
-      <ErrorNote error={error} />
+      <ErrorNote error={error ?? loadError} />
       <div className="card overflow-x-auto">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t('name')}</th>
-              <th>{t('email')}</th>
-              <th>{t('role')}</th>
-              <th>{t('status')}</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {data?.map((u) => (
-              <tr key={u.id}>
-                <td className="font-medium">{u.name}</td>
-                <td>{u.email}</td>
-                <td>{t(`role.${u.role}`)}</td>
-                <td>{u.is_active ? <Badge tone="green">{t('active')}</Badge> : <Badge>—</Badge>}</td>
-                <td className="text-right">
-                  <Button size="sm" variant="ghost" onClick={() => setEditing(u)}>
-                    {t('edit')}
-                  </Button>
-                  <Button size="sm" variant="ghost" className="text-red-600" onClick={() => void remove(u)}>
-                    {t('delete')}
-                  </Button>
-                </td>
+        {!data && !loadError ? (
+          <Loading />
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>{t('name')}</th>
+                <th>{t('email')}</th>
+                <th>{t('role')}</th>
+                <th>{t('status')}</th>
+                <th />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data?.map((u) => (
+                <tr key={u.id}>
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700 dark:bg-brand-900/50 dark:text-brand-200">
+                        {u.name.trim().charAt(0).toUpperCase()}
+                      </span>
+                      <span className="font-medium">{u.name}</span>
+                    </div>
+                  </td>
+                  <td className="text-muted">{u.email}</td>
+                  <td>
+                    <Badge tone={roleTone[u.role]}>{t(`role.${u.role}`)}</Badge>
+                  </td>
+                  <td>
+                    {u.is_active ? (
+                      <Badge dot tone="green">
+                        {t('active')}
+                      </Badge>
+                    ) : (
+                      <Badge dot>{t('inactive')}</Badge>
+                    )}
+                  </td>
+                  <td>
+                    <RowActions>
+                      <IconButton label={t('edit')} icon={HiOutlinePencilSquare} onClick={() => setEditing(u)} />
+                      <IconButton tone="danger" label={t('delete')} icon={HiOutlineTrash} onClick={() => void remove(u)} />
+                    </RowActions>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
       {editing && (
         <UserForm
@@ -111,7 +134,7 @@ function UserForm({ user, onClose, onSaved }: { user: User | null; onClose: () =
         </>
       }
     >
-      <div className="grid gap-3">
+      <div className="grid gap-4">
         <Field label={t('name')}>
           <input value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
@@ -130,7 +153,7 @@ function UserForm({ user, onClose, onSaved }: { user: User | null; onClose: () =
             ))}
           </select>
         </Field>
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-line px-3 py-2.5 text-sm">
           <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
           {t('active')}
         </label>
