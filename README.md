@@ -25,7 +25,10 @@
 | **អតិថិជន** | ព័ត៌មាន, ប័ណ្ណបើកបរ, ប្រវត្តិជួល/ទិញ | TPS |
 | **ចំណាយ** | ថែទាំ, ធានារ៉ាប់រង, សាំង, លាងសម្អាត, ផ្សេងៗ (តាមឡាន ឬទូទៅ) | TPS |
 | **របាយការណ៍ & ការសម្រេចចិត្ត** | ROI, អត្រាប្រើប្រាស់, ពិន្ទុវិនិយោគ, និន្នាការប្រចាំខែ, អតិថិជន/ឡានកំពូល, នាំចេញ Excel | DSS |
-| **អ្នកប្រើប្រាស់** | admin / manager / staff | — |
+| **អ្នកប្រើប្រាស់** | admin / manager / staff, បិទគណនី | — |
+| **កំណត់ហេតុសកម្មភាព** (Admin) | Audit log៖ អ្នកណាបង្កើត/កែ/លុបអ្វី ពេលណា (មុន → ក្រោយ), ចូល/ចេញ | — |
+| **បោះពុម្ព** | កិច្ចសន្យាជួល និងវិក្កយបត្រលក់ (A4, ខ្មែរ/English, Save as PDF) | TPS |
+| **ប្តូរពាក្យសម្ងាត់** | រូប 🔑 ក្បែរឈ្មោះ — ឧបករណ៍ផ្សេងទៀតត្រូវចេញ | — |
 
 ## ដំណើរការលើកុំព្យូទ័រ (Windows)
 
@@ -66,8 +69,13 @@ php artisan serve --port=8090
 
 ### ប្រើជាមួយទិន្នន័យពិត (Production)
 
-- ក្នុង `backend/.env` ដាក់ `APP_ENV=production` និង `APP_DEBUG=false` → ពេល seed ប្រព័ន្ធបង្កើត **ពាក្យសម្ងាត់ចៃដន្យ** សម្រាប់គណនីនីមួយៗ ហើយបង្ហាញតែម្តង (កត់ទុក!)
-- Build frontend ដោយលាក់ប៊ូតុងគណនីសាកល្បងលើទំព័រ Login៖ `$env:VITE_DEMO_ACCOUNTS='false'; npm run build`
+សូមអាន **[docs/06-deployment.md](docs/06-deployment.md)**៖ Server (Nginx/Apache), HTTPS, SQLite ឬ MySQL, Backup ស្វ័យប្រវត្តិ & Restore, និងបញ្ជីពិនិត្យមុនបើកឲ្យប្រើ។ សង្ខេប៖
+
+- ចម្លង `backend/.env.production.example` → `backend/.env` ហើយបំពេញ (`APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://...`, `ADMIN_EMAIL`, `COMPANY_*`)
+- `php artisan db:seed --force` ក្នុង Production បង្កើត **តែ Admin ម្នាក់** ជាមួយពាក្យសម្ងាត់ចៃដន្យ (បង្ហាញតែម្តង) — គ្មានទិន្នន័យគំរូ ឬគណនីសាកល្បង
+- Build frontend ដោយលាក់ប៊ូតុងគណនីសាកល្បង៖ `$env:VITE_DEMO_ACCOUNTS='false'; npm run build`
+- Backup៖ `php artisan backup:run` (ដំណើរការស្វ័យប្រវត្តិរៀងរាល់ថ្ងៃ តាម Scheduler)
+- ភ្លេចពាក្យសម្ងាត់ Admin៖ `php artisan app:admin you@example.com`
 
 ## ចំណុចប្រើប្រាស់ (UI)
 
@@ -88,7 +96,8 @@ cd ..;      python tools/build_excel.py --from 2025-12-01 --to 2026-11-10
 ## ការធ្វើតេស្ត
 
 ```powershell
-cd backend;  php artisan test          # ១២ tests: កក់ជាន់គ្នា, ពិន័យយឺត, បង់លើស, លក់, សិទ្ធិ, DSS
+cd backend;  php artisan test          # ២៧ tests: កក់ជាន់គ្នា, ពិន័យយឺត, បង់លើស, លក់, សិទ្ធិ, DSS,
+                                       #   ពាក្យសម្ងាត់, គណនីបិទ, audit log, backup, production seed
 cd frontend; npx tsc -b; npx oxlint
 ```
 
@@ -100,6 +109,7 @@ vehicle-rental/
 ├── frontend/           React 19 + TypeScript + Tailwind
 ├── docs/               ឯកសារ Assignment ១–៥ + Excel
 │   └── diagrams/       ដ្យាក្រាមជា PNG (សម្រាប់ Word/PDF/Slide)
+├── deploy/             Nginx / Apache config, update.sh, Windows scheduler (Production)
 ├── tools/build_excel.py  បង្កើត Excel dashboard ពី database
-└── start.ps1           ដំឡើង + ដំណើរការ ដោយចុចម្តង
+└── start.ps1           ដំឡើង + ដំណើរការ ដោយចុចម្តង (សម្រាប់ថ្នាក់/អភិវឌ្ឍ)
 ```

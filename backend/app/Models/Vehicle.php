@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Vehicle extends Model
 {
+    use Auditable;
+
     public const TYPES = ['car', 'suv', 'van', 'pickup', 'motorbike'];
 
     public const PURPOSES = ['rent', 'sale', 'both'];
@@ -85,5 +88,10 @@ class Vehicle extends Model
             : ($live->exists() ? 'reserved' : 'available');
 
         $this->forceFill(['status' => $status])->save();
+    }
+
+    public function auditLabel(): string
+    {
+        return trim("{$this->brand} {$this->model} · {$this->plate_no}");
     }
 }

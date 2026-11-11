@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\EnsureUserManages;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,8 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'manages' => EnsureUserManages::class,
             'admin' => EnsureUserIsAdmin::class,
+            'active' => EnsureUserIsActive::class,
         ]);
 
+        $middleware->append(SecurityHeaders::class);
         // A token API has no login page to redirect to.
         $middleware->redirectGuestsTo(fn () => null);
     })

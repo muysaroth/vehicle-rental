@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 class Booking extends Model
 {
+    use Auditable;
+
     public const STATUS_RESERVED = 'reserved';
 
     public const STATUS_ACTIVE = 'active';
@@ -102,5 +105,10 @@ class Booking extends Model
     public static function nextNumber(): string
     {
         return 'BK'.str_pad((string) ((int) static::max('id') + 1), 6, '0', STR_PAD_LEFT);
+    }
+
+    public function auditLabel(): string
+    {
+        return (string) $this->booking_no;
     }
 }

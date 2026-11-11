@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { HiOutlineArrowUturnLeft, HiOutlineCreditCard, HiOutlineKey, HiOutlinePlus, HiOutlineXCircle } from 'react-icons/hi2'
+import { Link, useSearchParams } from 'react-router-dom'
+import { HiOutlineArrowUturnLeft, HiOutlineCreditCard, HiOutlineKey, HiOutlinePlus, HiOutlinePrinter, HiOutlineXCircle } from 'react-icons/hi2'
 import {
   Badge,
   BookingStatusBadge,
@@ -15,6 +15,7 @@ import {
   SearchInput,
   Tabs,
   Toolbar,
+  buttonClass,
   cx,
   useLoad,
 } from '@/components/ui'
@@ -461,6 +462,12 @@ function BookingDetail({ id, onClose, onChanged }: { id: number; onClose: () => 
                   <HiOutlineXCircle />
                   {t('cancelBooking')}
                 </Button>
+              )}
+              {b.status !== 'cancelled' && (
+                <Link to={`/print/booking/${b.id}`} target="_blank" className={buttonClass('secondary')}>
+                  <HiOutlinePrinter />
+                  {t('printContract')}
+                </Link>
               )}
             </div>
           )}

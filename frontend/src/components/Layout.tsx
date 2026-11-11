@@ -7,6 +7,8 @@ import {
   HiOutlineBars3,
   HiOutlineCalendarDays,
   HiOutlineChartBar,
+  HiOutlineClipboardDocumentList,
+  HiOutlineKey,
   HiOutlineChevronRight,
   HiOutlineHome,
   HiOutlineReceiptPercent,
@@ -17,6 +19,7 @@ import {
 } from 'react-icons/hi2'
 import { useAuth } from '@/lib/auth'
 import { useI18n } from '@/lib/i18n'
+import { ChangePassword } from './ChangePassword'
 import { LanguageSwitch } from './LanguageSwitch'
 import { Logo } from './Logo'
 import { ThemeToggle } from './ThemeToggle'
@@ -41,6 +44,7 @@ function initials(name = ''): string {
 function Sidebar({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
   const { user, logout } = useAuth()
   const { t } = useI18n()
+  const [changing, setChanging] = useState(false)
 
   return (
     <div className="flex h-full flex-col bg-brand-900 text-brand-50 dark:bg-[#0a1a1f]">
@@ -79,12 +83,21 @@ function Sidebar({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => v
           ))}
       </nav>
 
-      <div className="m-3 flex items-center gap-3 rounded-xl bg-white/6 p-3">
-        <div className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-semibold text-white">{initials(user?.name)}</div>
+      <div className="m-3 flex items-center gap-1.5 rounded-xl bg-white/6 p-3">
+        <div className="mr-1.5 grid size-9 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-semibold text-white">{initials(user?.name)}</div>
         <div className="min-w-0 flex-1 text-sm">
           <div className="truncate font-medium text-white">{user?.name}</div>
           <div className="truncate text-xs text-brand-200/80">{user && t(`role.${user.role}`)}</div>
         </div>
+        <button
+          type="button"
+          onClick={() => setChanging(true)}
+          title={t('changePassword')}
+          aria-label={t('changePassword')}
+          className="grid size-8 shrink-0 place-items-center rounded-lg text-brand-200 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <HiOutlineKey className="size-5" />
+        </button>
         <button
           type="button"
           onClick={() => void logout()}
@@ -95,6 +108,7 @@ function Sidebar({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => v
           <HiOutlineArrowRightOnRectangle className="size-5" />
         </button>
       </div>
+      {changing && <ChangePassword onClose={() => setChanging(false)} />}
     </div>
   )
 }
@@ -114,6 +128,7 @@ export function Layout() {
     { to: '/expenses', label: t('expenses'), icon: HiOutlineReceiptPercent, show: canManage },
     { to: '/reports', label: t('reports'), icon: HiOutlineChartBar, show: canManage },
     { to: '/users', label: t('users'), icon: HiOutlineUsers, show: isAdmin },
+    { to: '/activity', label: t('activity'), icon: HiOutlineClipboardDocumentList, show: isAdmin },
   ]
 
   const current = items.find((i) => (i.to === '/' ? pathname === '/' : pathname.startsWith(i.to)))

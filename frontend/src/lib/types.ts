@@ -203,3 +203,34 @@ export interface Performance {
   top_vehicles: { id: number; plate_no: string; name: string; type: VehicleType; bookings: number; rented_days: number; revenue: number; expenses: number }[]
   expenses_by_category: Partial<Record<ExpenseCategory, number>>
 }
+
+export type ActivityAction = 'created' | 'updated' | 'deleted' | 'login' | 'logout' | 'password'
+
+export interface ActivityLog {
+  id: number
+  user_id: number | null
+  user_name: string | null
+  action: ActivityAction
+  subject_type: string | null
+  subject_id: number | null
+  subject_label: string | null
+  changes: Record<string, unknown> | null
+  ip: string | null
+  created_at: string
+}
+
+export interface Paginated<T> {
+  data: T[]
+  current_page: number
+  last_page: number
+  total: number
+}
+
+/** Company details printed on invoices and contracts (backend config/rental.php). */
+export interface Company {
+  name: string
+  address: string
+  phone: string
+  email: string
+  tax_id: string
+}
