@@ -20,13 +20,17 @@ flowchart LR
     A --> DB[("Database<br/>SQLite / MySQL")]
     A -- "Reports API" --> W
     W -- "នាំចេញ" --> X["Excel .xlsx"]
+    W -- "បោះពុម្ព" --> P["កិច្ចសន្យា / វិក្កយបត្រ<br/>A4 · PDF"]
+    S["Scheduler<br/>រៀងរាល់ថ្ងៃ"] -- "backup:run" --> BK[("Backup<br/>.sqlite / .sql")]
+    DB -.-> BK
 ```
 
 | ស្រទាប់ | តួនាទី | ឯកសារសំខាន់ |
 |---|---|---|
-| Presentation | អេក្រង់ ៨: Dashboard, ការជួល, ការលក់, យានយន្ត, អតិថិជន, ចំណាយ, របាយការណ៍, អ្នកប្រើ | `frontend/src/pages/*` |
-| Business logic | ច្បាប់អាជីវកម្ម (កក់ជាន់គ្នា, ពិន័យយឺត, ស្ថានភាពឡាន, សិទ្ធិ) | `backend/app/Http/Controllers/Api/*`, `backend/app/Models/*` |
-| Data | ៦ តារាងស្នូល + users | `backend/database/migrations/*` |
+| Presentation | អេក្រង់ ៩: Dashboard, ការជួល, ការលក់, យានយន្ត, អតិថិជន, ចំណាយ, របាយការណ៍, អ្នកប្រើ, កំណត់ហេតុសកម្មភាព + ទំព័របោះពុម្ព | `frontend/src/pages/*` |
+| Business logic | ច្បាប់អាជីវកម្ម (កក់ជាន់គ្នា, ពិន័យយឺត, ស្ថានភាពឡាន, សិទ្ធិ), កត់ត្រា audit log | `backend/app/Http/Controllers/Api/*`, `backend/app/Models/*` |
+| Data | ៦ តារាងស្នូល + users + activity_logs | `backend/database/migrations/*` |
+| ប្រតិបត្តិការ | Backup ប្រចាំថ្ងៃ, លុប token ផុតកំណត់ | `backend/routes/console.php`, `backend/app/Console/Commands/*` |
 
 ---
 
@@ -109,6 +113,7 @@ erDiagram
     USERS     ||--o{ SALES : "កត់ត្រា"
     USERS     ||--o{ PAYMENTS : "ទទួល"
     USERS     ||--o{ EXPENSES : "កត់ត្រា"
+    USERS     |o--o{ ACTIVITY_LOGS : "ធ្វើសកម្មភាព"
 
     CUSTOMERS {
         bigint id PK
@@ -190,6 +195,18 @@ erDiagram
         string role "admin|manager|staff"
         bool is_active
     }
+    ACTIVITY_LOGS {
+        bigint id PK
+        bigint user_id FK "nullable"
+        string user_name "ថតទុក"
+        string action "created|updated|deleted|login|logout|password"
+        string subject_type "Booking|Sale|Vehicle|..."
+        bigint subject_id
+        string subject_label
+        json changes "field: [មុន, ក្រោយ]"
+        string ip
+        datetime created_at
+    }
 ```
 
 ### វចនានុក្រមទិន្នន័យ (Data Dictionary) — ចំណុចសំខាន់
@@ -202,11 +219,12 @@ erDiagram
 | `sales` | ១៨ | ប្រតិបត្តិការលក់ | `vehicle_id` UNIQUE (ឡានលក់បានម្តង); `cost` ថតទុកពេលលក់ ដើម្បីចំណេញត្រឹមត្រូវ |
 | `payments` | ~៤,០០០ | ប្រាក់ចូលគ្រប់ប្រភេទ | ភ្ជាប់ booking **ឬ** sale; មិនអនុញ្ញាតបង់លើស balance |
 | `expenses` | ~៦០០/ឆ្នាំ | ចំណាយ (COSTS) | `vehicle_id` NULL = ចំណាយទូទៅ (ជួលការិយាល័យ, ភ្លើង) |
-| `users` | ៤ | បុគ្គលិក និងសិទ្ធិ | ពាក្យសម្ងាត់ bcrypt; ត្រូវមាន admin យ៉ាងតិច ១ |
+| `users` | ៤ | បុគ្គលិក និងសិទ្ធិ | ពាក្យសម្ងាត់ bcrypt (យ៉ាងតិច ៨ តួ); ត្រូវមាន admin យ៉ាងតិច ១; បិទគណនី → ចេញពីគ្រប់ឧបករណ៍ |
+| `activity_logs` | កើនឡើងតាមការប្រើ | Audit trail៖ អ្នកណាធ្វើអ្វី ពេលណា | សរសេរតែម្យ៉ាង (append-only); `changes` = តម្លៃមុន/ក្រោយ; **មិនដែល** រក្សាពាក្យសម្ងាត់; `user_name` ថតទុក ដើម្បីនៅតែអានបាន ទោះអ្នកប្រើត្រូវលុប |
 
 **តម្លៃដែលគណនា (derived, មិនរក្សាទុក)៖** `paid = SUM(payments.amount)`, `balance = total − paid`, `utilization = rented_days ÷ available_days`, `ROI = (rental revenue − expenses) ÷ purchase_cost`។
 
-**Normalization៖** តារាងទាំងអស់ស្ថិតក្នុង **3NF** — ព័ត៌មានអតិថិជន/ឡាន រក្សាតែមួយកន្លែង ហើយការកក់/លក់យោងតាម foreign key។ ករណីលើកលែងដោយចេតនា៖ `bookings.daily_rate` និង `sales.cost` ថតតម្លៃ *ពេលប្រតិបត្តិការ* ដើម្បីកុំឲ្យការកែតម្លៃឡានពេលក្រោយ ប្តូរប្រវត្តិ។
+**Normalization៖** តារាងទាំងអស់ស្ថិតក្នុង **3NF** — ព័ត៌មានអតិថិជន/ឡាន រក្សាតែមួយកន្លែង ហើយការកក់/លក់យោងតាម foreign key។ ករណីលើកលែងដោយចេតនា៖ `bookings.daily_rate` និង `sales.cost` ថតតម្លៃ *ពេលប្រតិបត្តិការ* ដើម្បីកុំឲ្យការកែតម្លៃឡានពេលក្រោយ ប្តូរប្រវត្តិ។ ដូចគ្នានេះ `activity_logs.user_name` និង `subject_label` ថតទុកដោយចេតនា ព្រោះ audit log ត្រូវបង្ហាញស្ថានភាព *ពេលនោះ* មិនមែនស្ថានភាពបច្ចុប្បន្នទេ។ `subject_type` + `subject_id` ជា polymorphic reference (គ្មាន FK) ដូច្នេះកំណត់ហេតុនៅតែមាន ទោះកំណត់ត្រាដើមត្រូវលុប។
 
 ---
 
@@ -218,8 +236,10 @@ erDiagram
 | មើលបញ្ជីឡាន | ✅ | ✅ | ✅ |
 | បន្ថែម/កែ/ជួសជុល ឡាន, ចំណាយ, មើលថ្លៃដើម/ចំណេញ | — | ✅ | ✅ |
 | របាយការណ៍ & ការសម្រេចចិត្ត (DSS), នាំចេញ Excel | — | ✅ | ✅ |
+| បោះពុម្ពកិច្ចសន្យាជួល / វិក្កយបត្រលក់ | ✅ | ✅ | ✅ |
+| ប្តូរពាក្យសម្ងាត់ខ្លួនឯង | ✅ | ✅ | ✅ |
 | លុបការលក់, លុបអតិថិជន | — | ✅ | ✅ |
-| គ្រប់គ្រងអ្នកប្រើ | — | — | ✅ |
+| គ្រប់គ្រងអ្នកប្រើ, មើលកំណត់ហេតុសកម្មភាព (audit log) | — | — | ✅ |
 
 ## ២.៥ API សង្ខេប
 
@@ -232,5 +252,10 @@ erDiagram
 | POST | `/api/bookings/{id}/pickup` · `/return` · `/cancel` · `/pay` | វដ្តការជួល |
 | POST | `/api/sales` · `/api/sales/{id}/pay` | លក់ / បង់រំលស់ |
 | GET | `/api/reports/performance?from&to` | DSS តាមប្រភេទឡាន |
+| PUT | `/api/auth/password` | ប្តូរពាក្យសម្ងាត់ខ្លួនឯង (ឧបករណ៍ផ្សេងត្រូវចេញ) |
+| GET | `/api/company` | ព័ត៌មានក្រុមហ៊ុន សម្រាប់បោះពុម្ព |
+| GET | `/api/activity?user_id&action&subject_type&from&to&search` | Audit log (Admin) |
 
-ការធ្វើតេស្ត៖ `backend/tests/Feature/RentalFlowTest.php` — ១២ test គ្របដណ្តប់ច្បាប់ខាងលើ (កក់ជាន់គ្នា, ពិន័យយឺត, បង់លើស, លក់ពីរដង, សិទ្ធិ, ចំណាត់ថ្នាក់ DSS)។
+ការធ្វើតេស្ត៖
+- Backend `backend/tests/Feature/` — ២៧ test៖ `RentalFlowTest` (កក់ជាន់គ្នា, ពិន័យយឺត, បង់លើស, លក់ពីរដង, សិទ្ធិ, ចំណាត់ថ្នាក់ DSS) និង `ProductionReadinessTest` (ពាក្យសម្ងាត់, គណនីបិទ, audit log, backup, production seed, security headers)
+- Frontend `frontend/src/**/*.test.ts(x)` — ការគណនាថ្ងៃ/ប្រាក់, ការបកប្រែ ខ្មែរ/English, សមាសភាគ UI (`npm test`)

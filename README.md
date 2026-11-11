@@ -98,6 +98,7 @@ cd ..;      python tools/build_excel.py --from 2025-12-01 --to 2026-11-10
 ```powershell
 cd backend;  php artisan test          # ២៧ tests: កក់ជាន់គ្នា, ពិន័យយឺត, បង់លើស, លក់, សិទ្ធិ, DSS,
                                        #   ពាក្យសម្ងាត់, គណនីបិទ, audit log, backup, production seed
+cd frontend; npm test                  # ៣៤ tests: គណនាថ្ងៃ/ប្រាក់, ការបកប្រែ ខ្មែរ/EN គ្រប់ពាក្យ, UI (Modal, Badge, ប្តូរពាក្យសម្ងាត់)
 cd frontend; npx tsc -b; npx oxlint
 ```
 
