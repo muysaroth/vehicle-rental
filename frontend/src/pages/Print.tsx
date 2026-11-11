@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useParams } from 'react-router-dom'
 import { HiOutlineArrowLeft, HiOutlinePrinter } from 'react-icons/hi2'
 import { LanguageSwitch } from '@/components/LanguageSwitch'
-import { Button, ErrorNote, Loading, useLoad } from '@/components/ui'
+import { Arrow, Button, ErrorNote, Loading, useLoad } from '@/components/ui'
 import { api } from '@/lib/api'
 import { date, dateTime, money, vehicleName } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
@@ -194,7 +194,7 @@ function RentalContract({ booking: b, company }: { booking: Booking; company: Co
       <Block title={t('period')}>
         <div className="flex items-center justify-between rounded border border-slate-300 px-4 py-2.5 text-base">
           <span>
-            <strong>{date(b.start_date)}</strong> → <strong>{date(b.end_date)}</strong>
+            <strong>{date(b.start_date)}</strong> <Arrow className="text-slate-500" /> <strong>{date(b.end_date)}</strong>
           </span>
           <span>
             {b.days} {t('days')} × {money(b.daily_rate)}

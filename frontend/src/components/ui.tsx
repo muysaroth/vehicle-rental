@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { ComponentPropsWithRef, ReactNode } from 'react'
 import type { IconType } from 'react-icons'
-import { HiOutlineExclamationTriangle, HiOutlineInbox, HiOutlineMagnifyingGlass, HiOutlineXMark } from 'react-icons/hi2'
+import { HiOutlineArrowLongRight, HiOutlineExclamationTriangle, HiOutlineInbox, HiOutlineMagnifyingGlass, HiOutlineXMark } from 'react-icons/hi2'
 import { errorMessage } from '@/lib/api'
 import { isoDate } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
@@ -204,6 +204,16 @@ const dots: Record<keyof typeof tones, string> = {
   red: 'bg-red-500',
   slate: 'bg-slate-400',
   violet: 'bg-violet-500',
+}
+
+/** Inline "from → to" arrow icon (replaces the text arrow). */
+export function Arrow({ className }: { className?: string }) {
+  return (
+    <>
+      <HiOutlineArrowLongRight aria-hidden className={cx('inline-block size-4 shrink-0 align-[-0.2em] text-muted', className)} />
+      <span className="sr-only"> – </span>
+    </>
+  )
 }
 
 export function Badge({ tone = 'slate', dot, children }: { tone?: keyof typeof tones; dot?: boolean; children: ReactNode }) {

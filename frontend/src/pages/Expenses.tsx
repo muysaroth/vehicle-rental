@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { HiOutlinePencilSquare, HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi2'
 import { Meter } from '@/components/charts'
-import { Badge, Button, Empty, ErrorNote, Field, IconButton, Loading, Modal, PageHeader, RowActions, Stat, Toolbar, useLoad } from '@/components/ui'
+import { Arrow, Badge, Button, Empty, ErrorNote, Field, IconButton, Loading, Modal, PageHeader, RowActions, Stat, Toolbar, useLoad } from '@/components/ui'
 import { api } from '@/lib/api'
 import { addDays, date, isoDate, money, vehicleName } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
@@ -56,7 +56,7 @@ export default function Expenses() {
       <Toolbar>
         <div className="flex items-center gap-2">
           <input type="date" aria-label={t('from')} value={from} onChange={(e) => setFrom(e.target.value)} />
-          <span className="text-muted">→</span>
+          <Arrow />
           <input type="date" aria-label={t('to')} value={to} onChange={(e) => setTo(e.target.value)} />
         </div>
         <select value={category} onChange={(e) => setCategory(e.target.value)}>

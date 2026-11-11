@@ -1,24 +1,7 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { HiOutlineArrowUturnLeft, HiOutlineCreditCard, HiOutlineKey, HiOutlinePlus, HiOutlinePrinter, HiOutlineXCircle } from 'react-icons/hi2'
-import {
-  Badge,
-  BookingStatusBadge,
-  Button,
-  DetailList,
-  Empty,
-  ErrorNote,
-  Field,
-  Loading,
-  Modal,
-  PageHeader,
-  SearchInput,
-  Tabs,
-  Toolbar,
-  buttonClass,
-  cx,
-  useLoad,
-} from '@/components/ui'
+import { Arrow, Badge, BookingStatusBadge, Button, DetailList, Empty, ErrorNote, Field, Loading, Modal, PageHeader, SearchInput, Tabs, Toolbar, buttonClass, cx, useLoad } from '@/components/ui'
 import { api } from '@/lib/api'
 import { addDays, date, dateTime, daysBetween, isoDate, money, vehicleName } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
@@ -403,7 +386,12 @@ function BookingDetail({ id, onClose, onChanged }: { id: number; onClose: () => 
                 </>,
               ],
               [t('vehicle'), `${vehicleName(b.vehicle)} · ${b.vehicle?.plate_no ?? ''}`],
-              [t('period'), `${date(b.start_date)} → ${date(b.end_date)} (${b.days} ${t('days')})`],
+              [
+                t('period'),
+                <>
+                  {date(b.start_date)} <Arrow /> {date(b.end_date)} ({b.days} {t('days')})
+                </>,
+              ],
               [t('dailyRate'), money(b.daily_rate)],
               [t('discount'), money(b.discount)],
               b.late_fee > 0 && [t('lateFee'), money(b.late_fee)],

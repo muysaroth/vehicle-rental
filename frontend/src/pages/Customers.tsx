@@ -1,20 +1,6 @@
 import { useState } from 'react'
 import { HiOutlineClock, HiOutlinePencilSquare, HiOutlinePlus, HiOutlineTrash } from 'react-icons/hi2'
-import {
-  BookingStatusBadge,
-  Button,
-  Empty,
-  ErrorNote,
-  Field,
-  IconButton,
-  Loading,
-  Modal,
-  PageHeader,
-  RowActions,
-  SearchInput,
-  Toolbar,
-  useLoad,
-} from '@/components/ui'
+import { Arrow, BookingStatusBadge, Button, Empty, ErrorNote, Field, IconButton, Loading, Modal, PageHeader, RowActions, SearchInput, Toolbar, useLoad } from '@/components/ui'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { date, money, vehicleName } from '@/lib/format'
@@ -214,7 +200,7 @@ function CustomerHistory({ id, onClose }: { id: number; onClose: () => void }) {
                       <td className="font-mono text-xs">{b.booking_no}</td>
                       <td>{vehicleName(b.vehicle)}</td>
                       <td>
-                        {date(b.start_date)} → {date(b.end_date)}
+                        {date(b.start_date)} <Arrow /> {date(b.end_date)}
                       </td>
                       <td className="num">{money(b.total)}</td>
                       <td>

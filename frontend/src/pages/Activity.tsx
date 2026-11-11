@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi2'
-import { Badge, Button, Empty, ErrorNote, Loading, PageHeader, SearchInput, Toolbar, useLoad } from '@/components/ui'
+import { Arrow, Badge, Button, Empty, ErrorNote, Loading, PageHeader, SearchInput, Toolbar, useLoad } from '@/components/ui'
 import { api } from '@/lib/api'
 import { useI18n } from '@/lib/i18n'
 import type { ActivityAction, ActivityLog, Paginated, User } from '@/lib/types'
@@ -34,7 +34,7 @@ function Changes({ log }: { log: ActivityLog }) {
           <span className="font-medium text-muted">{field}:</span>{' '}
           {log.action === 'updated' && Array.isArray(value) ? (
             <>
-              <span className="text-red-600 line-through decoration-red-300">{show(value[0])}</span> → <span className="text-emerald-700">{show(value[1])}</span>
+              <span className="text-red-600 line-through decoration-red-300">{show(value[0])}</span> <Arrow /> <span className="text-emerald-700">{show(value[1])}</span>
             </>
           ) : (
             show(value)

@@ -11,7 +11,7 @@ import {
   HiOutlineUserGroup,
   HiOutlineWallet,
 } from 'react-icons/hi2'
-import { BookingStatusBadge, ErrorNote, Loading, PageHeader, Section, Stat, buttonClass, cx, useLoad } from '@/components/ui'
+import { Arrow, BookingStatusBadge, ErrorNote, Loading, PageHeader, Section, Stat, buttonClass, cx, useLoad } from '@/components/ui'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { date, money, pct, vehicleName } from '@/lib/format'
@@ -45,7 +45,7 @@ function Due({ title, rows, tone }: { title: string; rows: Booking[]; tone?: 're
               <div className="min-w-0">
                 <div className="truncate font-medium">{b.customer?.name}</div>
                 <div className="truncate text-xs text-muted">
-                  {vehicleName(b.vehicle)} · {b.vehicle?.plate_no} · {date(b.start_date)} → {date(b.end_date)}
+                  {vehicleName(b.vehicle)} · {b.vehicle?.plate_no} · {date(b.start_date)} <Arrow /> {date(b.end_date)}
                 </div>
               </div>
               <BookingStatusBadge status={b.status} endDate={b.end_date} />
