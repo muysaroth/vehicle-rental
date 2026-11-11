@@ -9,10 +9,12 @@ The raw-data sheets hold values exported from the database; every summary
 workbook recalculates if a row is edited or added.
 
     python tools/build_excel.py            # from the vehicle-rental folder
+    python tools/build_excel.py --from 2025-12-01 --to 2026-11-10   # the period used in docs/03
 """
 
 from __future__ import annotations
 
+import argparse
 import sqlite3
 import sys
 from datetime import date, timedelta
@@ -93,11 +95,28 @@ def data_sheet(wb: Workbook, name: str, headers: list[str], rows: list[list], wi
     return ws
 
 
+def parse_args() -> argparse.Namespace:
+    ap = argparse.ArgumentParser(description="Build the Excel dashboard from the system database.")
+    ap.add_argument("--from", dest="start", type=date.fromisoformat, help="first day (YYYY-MM-DD); default: 12 months back")
+    ap.add_argument("--to", dest="end", type=date.fromisoformat, help="last day (YYYY-MM-DD); default: today")
+    return ap.parse_args()
+
+
 def main() -> None:
     if not DB.exists():
         sys.exit(f"Database not found: {DB}\nRun `php artisan migrate:fresh --seed` in backend/ first.")
 
+    args = parse_args()
     start, end = period()
+    if args.end:
+        end = args.end
+        if not args.start:  # same rule as the app: 12 calendar months ending at `to`
+            m = end.month - 11
+            start = date(end.year + (m - 1) // 12, (m - 1) % 12 + 1, 1)
+    if args.start:
+        start = args.start
+    if start > end:
+        raise SystemExit("--from must be on or before --to")
     con = sqlite3.connect(DB)
     con.row_factory = sqlite3.Row
     q = lambda sql, *a: con.execute(sql, a).fetchall()  # noqa: E731

@@ -2,6 +2,8 @@
 
 **ឧទាហរណ៍៖** ការកក់ដោយដៃ (Manual booking) → ប្រព័ន្ធស្វ័យប្រវត្តិ (Automated system)
 
+> រូបភាព PNG សម្រាប់ដាក់ក្នុង Word/PDF/Slide៖ [As-Is](diagrams/05-1-as-is.png) · [To-Be](diagrams/05-2-to-be.png)
+
 ---
 
 ## ៥.១ ដំណើរការបច្ចុប្បន្ន “As-Is” (ដោយដៃ)

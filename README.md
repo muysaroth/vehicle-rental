@@ -64,6 +64,27 @@ php artisan serve --port=8090
 
 > ប្តូរពាក្យសម្ងាត់ទាំងនេះ (អេក្រង់ អ្នកប្រើប្រាស់) មុនពេលប្រើជាមួយទិន្នន័យពិត។
 
+### ប្រើជាមួយទិន្នន័យពិត (Production)
+
+- ក្នុង `backend/.env` ដាក់ `APP_ENV=production` និង `APP_DEBUG=false` → ពេល seed ប្រព័ន្ធបង្កើត **ពាក្យសម្ងាត់ចៃដន្យ** សម្រាប់គណនីនីមួយៗ ហើយបង្ហាញតែម្តង (កត់ទុក!)
+- Build frontend ដោយលាក់ប៊ូតុងគណនីសាកល្បងលើទំព័រ Login៖ `$env:VITE_DEMO_ACCOUNTS='false'; npm run build`
+
+## ចំណុចប្រើប្រាស់ (UI)
+
+- **ប្តូរភាសា ខ្មែរ | EN** និង **Dark mode** (ប៊ូតុង ☀/☾) នៅជ្រុងខាងលើស្តាំនៃគ្រប់អេក្រង់ និងនៅទំព័រ Login — ប្រព័ន្ធចងចាំជម្រើស។ Dark mode តាមការកំណត់កុំព្យូទ័រ រហូតដល់អ្នកប្រើជ្រើសដោយខ្លួនឯង។
+
+## ផលិតតួលេខក្នុងឯកសារឡើងវិញ
+
+ទិន្នន័យគំរូគណនាធៀបនឹង «ថ្ងៃនេះ»។ ដើម្បីបានតួលេខដូច [ឯកសារ ៣](docs/03-decision-support.md) ទាំងស្រុង៖
+
+```powershell
+# backend/.env:  DEMO_TODAY=2026-11-10
+cd backend; php artisan migrate:fresh --seed
+cd ..;      python tools/build_excel.py --from 2025-12-01 --to 2026-11-10
+```
+
+បន្ទាប់មកក្នុងអេក្រង់ **របាយការណ៍** ជ្រើសរយៈពេល `2025-12-01` → `2026-11-10`។ ទុក `DEMO_TODAY` ទទេ ដើម្បីប្រើថ្ងៃពិត (ល្អសម្រាប់បង្ហាញ Dashboard «ថ្ងៃនេះ»)។
+
 ## ការធ្វើតេស្ត
 
 ```powershell
@@ -78,6 +99,7 @@ vehicle-rental/
 ├── backend/            Laravel 12 API (Models, Controllers, migrations, seeders, tests)
 ├── frontend/           React 19 + TypeScript + Tailwind
 ├── docs/               ឯកសារ Assignment ១–៥ + Excel
+│   └── diagrams/       ដ្យាក្រាមជា PNG (សម្រាប់ Word/PDF/Slide)
 ├── tools/build_excel.py  បង្កើត Excel dashboard ពី database
 └── start.ps1           ដំឡើង + ដំណើរការ ដោយចុចម្តង
 ```

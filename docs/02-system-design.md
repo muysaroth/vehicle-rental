@@ -3,7 +3,9 @@
 **ប្រព័ន្ធ៖** Vehicle Sales & Rental System — Mekong Wheels
 **បច្ចេកវិទ្យា៖** Laravel 12 (PHP, REST API) · React 19 + TypeScript (Web) · SQLite (ឬ MySQL)
 
-> ដ្យាក្រាមខាងក្រោមសរសេរជា **Mermaid** — បើកក្នុង GitHub, VS Code (Markdown Preview Mermaid), ឬ https://mermaid.live ដើម្បីមើលជារូប/នាំចេញ PNG។
+> ដ្យាក្រាមខាងក្រោមសរសេរជា **Mermaid** — បើកក្នុង GitHub ឬ VS Code (Markdown Preview Mermaid)។
+> **រូបភាព PNG សម្រាប់ដាក់ក្នុង Word/PDF/Slide** មាននៅ [docs/diagrams/](diagrams/)៖
+> [Architecture](diagrams/02-1-architecture.png) · [Flowchart ការជួល](diagrams/02-2-rental-flowchart.png) · [Flowchart ការលក់](diagrams/02-3-sale-flowchart.png) · [State diagram](diagrams/02-4-booking-states.png) · [ERD](diagrams/02-5-erd.png)
 
 ---
 

@@ -12,6 +12,9 @@ const DEMO = [
   ['staff@rental.test', 'staff123', 'role.staff'],
 ] as const
 
+// The one-click demo logins are for the classroom. Build with VITE_DEMO_ACCOUNTS=false for real use.
+const SHOW_DEMO = import.meta.env.VITE_DEMO_ACCOUNTS !== 'false'
+
 export default function Login() {
   const { login } = useAuth()
   const { t } = useI18n()
@@ -61,24 +64,26 @@ export default function Login() {
             {t('signIn')}
           </Button>
 
-          <div className="border-t border-line pt-3">
-            <div className="mb-2 text-xs font-medium text-muted">{t('demoAccounts')}</div>
-            <div className="grid grid-cols-3 gap-2">
-              {DEMO.map(([e, p, role]) => (
-                <button
-                  key={e}
-                  type="button"
-                  className="rounded-lg border border-line px-2 py-1.5 text-xs hover:bg-surface-2"
-                  onClick={() => {
-                    setEmail(e)
-                    setPassword(p)
-                  }}
-                >
-                  {t(role)}
-                </button>
-              ))}
+          {SHOW_DEMO && (
+            <div className="border-t border-line pt-3">
+              <div className="mb-2 text-xs font-medium text-muted">{t('demoAccounts')}</div>
+              <div className="grid grid-cols-3 gap-2">
+                {DEMO.map(([e, p, role]) => (
+                  <button
+                    key={e}
+                    type="button"
+                    className="rounded-lg border border-line px-2 py-1.5 text-xs hover:bg-surface-2"
+                    onClick={() => {
+                      setEmail(e)
+                      setPassword(p)
+                    }}
+                  >
+                    {t(role)}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </form>
       </div>
     </div>
