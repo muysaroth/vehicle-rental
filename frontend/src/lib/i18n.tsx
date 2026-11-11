@@ -18,6 +18,8 @@ const dict = {
   reports: ['របាយការណ៍ & ការសម្រេចចិត្ត', 'Reports & Decisions'],
   users: ['អ្នកប្រើប្រាស់', 'Users'],
   logout: ['ចាកចេញ', 'Sign out'],
+  darkMode: ['របៀបងងឹត', 'Dark mode'],
+  lightMode: ['របៀបភ្លឺ', 'Light mode'],
 
   // auth
   signIn: ['ចូលប្រព័ន្ធ', 'Sign in'],

@@ -16,9 +16,9 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success'
 
 const variants: Record<Variant, string> = {
   primary: 'bg-brand-700 text-white hover:bg-brand-800 shadow-sm',
-  secondary: 'bg-white text-ink border border-line hover:bg-slate-50',
-  ghost: 'text-muted hover:bg-slate-100 hover:text-ink',
-  danger: 'bg-white text-red-600 border border-red-200 hover:bg-red-50',
+  secondary: 'bg-surface text-ink border border-line hover:bg-surface-2',
+  ghost: 'text-muted hover:bg-surface-3 hover:text-ink',
+  danger: 'bg-surface text-red-600 border border-red-200 hover:bg-red-50',
   success: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm',
 }
 
@@ -73,7 +73,7 @@ export function Modal({ open, onClose, title, children, footer, wide }: ModalPro
       >
         <div className="flex items-center justify-between border-b border-line px-5 py-3">
           <h2 className="text-base font-semibold">{title}</h2>
-          <button type="button" aria-label="Close" className="rounded p-1 text-muted hover:bg-slate-100" onClick={onClose}>
+          <button type="button" aria-label="Close" className="rounded p-1 text-muted hover:bg-surface-3" onClick={onClose}>
             <HiOutlineXMark className="size-5" />
           </button>
         </div>
@@ -89,7 +89,7 @@ export function Modal({ open, onClose, title, children, footer, wide }: ModalPro
 export function Field({ label, children, className }: { label: ReactNode; children: ReactNode; className?: string }) {
   return (
     <label className={cx('flex flex-col gap-1 text-sm', className)}>
-      <span className="font-medium text-slate-700">{label}</span>
+      <span className="font-medium text-ink">{label}</span>
       {children}
     </label>
   )
@@ -107,7 +107,7 @@ const tones = {
   blue: 'bg-sky-50 text-sky-700 ring-sky-200',
   amber: 'bg-amber-50 text-amber-800 ring-amber-200',
   red: 'bg-red-50 text-red-700 ring-red-200',
-  slate: 'bg-slate-100 text-slate-600 ring-slate-200',
+  slate: 'bg-surface-3 text-muted ring-line',
   violet: 'bg-violet-50 text-violet-700 ring-violet-200',
 }
 

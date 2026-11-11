@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { LanguageSwitch } from '@/components/LanguageSwitch'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button, ErrorNote, Field } from '@/components/ui'
 import { useAuth } from '@/lib/auth'
 import { useI18n } from '@/lib/i18n'
@@ -12,7 +14,7 @@ const DEMO = [
 
 export default function Login() {
   const { login } = useAuth()
-  const { t, lang, setLang } = useI18n()
+  const { t } = useI18n()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<unknown>(null)
@@ -43,9 +45,10 @@ export default function Login() {
         <form onSubmit={submit} className="card space-y-4 p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">{t('signIn')}</h2>
-            <button type="button" className="text-xs text-brand-700 hover:underline" onClick={() => setLang(lang === 'km' ? 'en' : 'km')}>
-              {lang === 'km' ? 'English' : 'ខ្មែរ'}
-            </button>
+            <div className="flex items-center gap-2">
+              <LanguageSwitch />
+              <ThemeToggle />
+            </div>
           </div>
           <Field label={t('email')}>
             <input type="text" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
@@ -65,7 +68,7 @@ export default function Login() {
                 <button
                   key={e}
                   type="button"
-                  className="rounded-lg border border-line px-2 py-1.5 text-xs hover:bg-slate-50"
+                  className="rounded-lg border border-line px-2 py-1.5 text-xs hover:bg-surface-2"
                   onClick={() => {
                     setEmail(e)
                     setPassword(p)

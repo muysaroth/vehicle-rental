@@ -43,15 +43,15 @@ export function Chart({ labels, series, format = (n) => String(Math.round(n)), h
       <svg viewBox={`0 0 ${W} ${height}`} className="w-full" role="img">
         {ticks.map((tk) => (
           <g key={tk}>
-            <line x1={PAD.left} x2={W - PAD.right} y1={y(tk)} y2={y(tk)} stroke="#e2e8f0" />
-            <text x={PAD.left - 8} y={y(tk) + 4} textAnchor="end" fontSize="11" fill="#64748b">
+            <line x1={PAD.left} x2={W - PAD.right} y1={y(tk)} y2={y(tk)} className="stroke-line" />
+            <text x={PAD.left - 8} y={y(tk) + 4} textAnchor="end" fontSize="11" className="fill-muted">
               {format(tk)}
             </text>
           </g>
         ))}
 
         {labels.map((label, i) => (
-          <text key={label} x={PAD.left + step * i + step / 2} y={height - 8} textAnchor="middle" fontSize="11" fill="#64748b">
+          <text key={label} x={PAD.left + step * i + step / 2} y={height - 8} textAnchor="middle" fontSize="11" className="fill-muted">
             {label}
           </text>
         ))}
@@ -102,7 +102,7 @@ export function Chart({ labels, series, format = (n) => String(Math.round(n)), h
       </div>
 
       {hover !== null && (
-        <div className="pointer-events-none absolute top-0 right-0 rounded-lg border border-line bg-white px-3 py-2 text-xs shadow">
+        <div className="pointer-events-none absolute top-0 right-0 rounded-lg border border-line bg-surface px-3 py-2 text-xs shadow">
           <div className="mb-1 font-semibold">{labels[hover]}</div>
           {series.map((s) => (
             <div key={s.name} className="flex justify-between gap-4">
@@ -119,7 +119,7 @@ export function Chart({ labels, series, format = (n) => String(Math.round(n)), h
 /** A single horizontal meter, for utilisation and shares. */
 export function Meter({ value, color = '#0f766e' }: { value: number; color?: string }) {
   return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+    <div className="h-2 w-full overflow-hidden rounded-full bg-surface-3">
       <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, value * 100))}%`, background: color }} />
     </div>
   )

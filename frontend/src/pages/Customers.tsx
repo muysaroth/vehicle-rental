@@ -63,7 +63,7 @@ export default function Customers() {
               {data?.map((c) => (
                 <tr key={c.id}>
                   <td>
-                    <button type="button" className="font-medium text-brand-700 hover:underline" onClick={() => setViewing(c.id)}>
+                    <button type="button" className="font-medium text-brand-700 dark:text-brand-300 hover:underline" onClick={() => setViewing(c.id)}>
                       {c.name}
                     </button>
                   </td>

@@ -79,7 +79,7 @@ function ReportBody({ data }: { data: Performance }) {
         </div>
         <div className="grid gap-2 p-5 sm:grid-cols-5">
           {data.recommendation.ranking.map((r, i) => (
-            <div key={r.type} className={i === 0 ? 'rounded-lg bg-brand-50 p-3 ring-2 ring-brand-500' : 'rounded-lg bg-slate-50 p-3'}>
+            <div key={r.type} className={i === 0 ? 'rounded-lg bg-brand-50 dark:bg-brand-900/40 p-3 ring-2 ring-brand-500' : 'rounded-lg bg-surface-2 p-3'}>
               <div className="flex items-baseline justify-between">
                 <span className="font-semibold">
                   #{i + 1} {t(`type.${r.type}`)}

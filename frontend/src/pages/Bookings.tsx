@@ -35,7 +35,7 @@ export default function Bookings() {
             key={s || 'all'}
             type="button"
             onClick={() => setStatus(s)}
-            className={cx('rounded-lg px-3 py-1.5 text-sm', status === s ? 'bg-brand-700 text-white' : 'bg-white text-slate-600 hover:bg-slate-100')}
+            className={cx('rounded-lg px-3 py-1.5 text-sm', status === s ? 'bg-brand-700 text-white' : 'bg-surface text-muted hover:bg-surface-3')}
           >
             {s ? t(`bstatus.${s}`) : t('all')}
           </button>
@@ -222,7 +222,7 @@ function NewBooking({ onClose, onCreated }: { onClose: () => void; onCreated: (b
                   }}
                   className={cx(
                     'flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm',
-                    v.id === vehicleId ? 'bg-brand-50 ring-2 ring-brand-500' : 'hover:bg-slate-50',
+                    v.id === vehicleId ? 'bg-brand-50 dark:bg-brand-900/40 ring-2 ring-brand-500' : 'hover:bg-surface-2',
                   )}
                 >
                   <span>
@@ -281,7 +281,7 @@ function NewBooking({ onClose, onCreated }: { onClose: () => void; onCreated: (b
             <textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
           </Field>
 
-          <dl className="space-y-1 rounded-lg bg-slate-50 p-3 text-sm">
+          <dl className="space-y-1 rounded-lg bg-surface-2 p-3 text-sm">
             <div className="flex justify-between">
               <dt>
                 {t('subtotal')} ({days} {t('days')} × {money(Number(rate || 0))})
