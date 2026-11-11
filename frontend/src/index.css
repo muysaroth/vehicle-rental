@@ -1,0 +1,74 @@
+@import 'tailwindcss';
+
+@import '@fontsource-variable/inter';
+@import '@fontsource/noto-sans-khmer/400.css';
+@import '@fontsource/noto-sans-khmer/500.css';
+@import '@fontsource/noto-sans-khmer/700.css';
+
+@theme {
+  --font-sans: 'Inter Variable', 'Noto Sans Khmer', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #f0fdfa;
+  --color-brand-100: #ccfbf1;
+  --color-brand-200: #99f6e4;
+  --color-brand-300: #5eead4;
+  --color-brand-500: #14b8a6;
+  --color-brand-600: #0d9488;
+  --color-brand-700: #0f766e;
+  --color-brand-800: #115e59;
+  --color-brand-900: #134e4a;
+
+  --color-ink: #0f172a;
+  --color-muted: #64748b;
+  --color-line: #e2e8f0;
+  --color-canvas: #f1f5f9;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink antialiased;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+  }
+
+  input:disabled,
+  select:disabled {
+    @apply bg-slate-50 text-muted;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-line bg-white shadow-sm;
+  }
+
+  .table {
+    @apply w-full text-left text-sm;
+  }
+
+  .table th {
+    @apply border-b border-line bg-slate-50 px-3 py-2 text-xs font-semibold tracking-wide text-muted uppercase;
+  }
+
+  .table td {
+    @apply border-b border-line px-3 py-2 align-middle;
+  }
+
+  .table tbody tr:hover {
+    @apply bg-slate-50;
+  }
+
+  .num {
+    @apply text-right tabular-nums;
+  }
+}

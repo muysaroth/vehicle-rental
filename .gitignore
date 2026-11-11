@@ -1,0 +1,6 @@
+/backend/vendor
+/frontend/node_modules
+/backend/public/build
+/backend/.env
+/backend/database/*.sqlite*
+~$*.xlsx
